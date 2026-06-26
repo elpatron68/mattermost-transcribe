@@ -48,7 +48,7 @@ Transcribe adds voice-to-text to Mattermost using a self-hosted [Parakeet](https
 - [x] README: features, requirements, Parakeet setup, installation, configuration, usage, architecture, limitations
 - [x] [CHANGELOG.md](../CHANGELOG.md) with release history
 - [x] **Screenshots** in [docs/screenshots/](screenshots/) and embedded in README (see [screenshots/README.md](screenshots/README.md))
-- [ ] **512×512 PNG** for the web Marketplace form (export from `assets/icon.svg`)
+- [x] **512×512 PNG** for the web Marketplace form (`docs/screenshots/marketplace-icon-512.png`, exported from `assets/icon.svg`)
 
 ### Build and releases
 
@@ -105,7 +105,7 @@ Replace `v1.0.0` with the released version. Use `--official` only for Mattermost
 |-------|-----------------|
 | Plugin bundle | `dist/de.medisoftware.mattermost-transcribe-<version>.tar.gz` |
 | SVG icon (in bundle) | `assets/icon.svg` |
-| Web listing icon | 512×512 PNG, max 5 MB |
+| Web listing icon | `docs/screenshots/marketplace-icon-512.png` (512×512 PNG) |
 | Screenshots | `docs/screenshots/*.png`, shown in README |
 | Release notes | GitHub Release + [CHANGELOG.md](../CHANGELOG.md) |
 
