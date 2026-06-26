@@ -1,3 +1,5 @@
+mattermost-server-dev/.env
+
 # Build artifacts
 bin/
 dist/
