@@ -139,12 +139,17 @@ The bundle is about 60–65 MB (all platform binaries). Ensure upload limits all
 
 ## Screenshots
 
-> Screenshots for the Marketplace listing are not yet committed. Capture them following
-> [docs/screenshots/README.md](docs/screenshots/README.md), then add images here:
->
-> - Message input with microphone button
-> - Recording overlay with level meter
-> - Review dialog before sending
+Message input with microphone button:
+
+![Message input with microphone button](docs/screenshots/message-input-microphone.png)
+
+Recording in progress (timer and level meter):
+
+![Recording overlay](docs/screenshots/recording-overlay.png)
+
+Review dialog before sending:
+
+![Review dialog](docs/screenshots/review-dialog.png)
 
 ## Architecture
 
@@ -219,7 +224,7 @@ Before submitting:
 
 1. Complete the checklist in [docs/MARKETPLACE.md](docs/MARKETPLACE.md)
 2. Release **v1.0.0** (Marketplace expects a non-beta version)
-3. Add screenshots to [docs/screenshots/](docs/screenshots/) and embed them in this README
+3. Add screenshots to [docs/screenshots/](docs/screenshots/) and embed them in this README — done
 4. Submit the [Marketplace contribution form](https://developers.mattermost.com/integrate/marketplace-submissions/)
 5. Request review in **Integrations and Apps** on the [Mattermost Community Server](https://community.mattermost.com)
 

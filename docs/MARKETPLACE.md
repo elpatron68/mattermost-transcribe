@@ -47,7 +47,7 @@ Transcribe adds voice-to-text to Mattermost using a self-hosted [Parakeet](https
 
 - [x] README: features, requirements, Parakeet setup, installation, configuration, usage, architecture, limitations
 - [x] [CHANGELOG.md](../CHANGELOG.md) with release history
-- [ ] **Screenshots** in [docs/screenshots/](screenshots/) and embedded in README (see [screenshots/README.md](screenshots/README.md))
+- [x] **Screenshots** in [docs/screenshots/](screenshots/) and embedded in README (see [screenshots/README.md](screenshots/README.md))
 - [ ] **512×512 PNG** for the web Marketplace form (export from `assets/icon.svg`)
 
 ### Build and releases
