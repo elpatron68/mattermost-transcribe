@@ -59,6 +59,8 @@ func (p *Plugin) GetClientConfig(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
+const clientErrorTranscriptionFailed = "Transcription failed"
+
 func (p *Plugin) HandleTranscribe(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseMultipartForm(maxAudioUploadSize); err != nil {
 		http.Error(w, "Failed to parse upload", http.StatusBadRequest)
@@ -93,8 +95,10 @@ func (p *Plugin) HandleTranscribe(w http.ResponseWriter, r *http.Request) {
 
 	text, err := p.transcribeAudio(audio, filename)
 	if err != nil {
-		p.API.LogError("Transcription failed", "error", err)
-		http.Error(w, err.Error(), http.StatusBadGateway)
+		if p.API != nil {
+			p.API.LogError("Transcription failed", "error", err)
+		}
+		http.Error(w, clientErrorTranscriptionFailed, http.StatusBadGateway)
 		return
 	}
 

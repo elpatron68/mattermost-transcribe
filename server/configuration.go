@@ -168,6 +168,10 @@ func (p *Plugin) OnConfigurationChange() error {
 		configuration.MaxRecordingDuration = 120
 	}
 
+	if err := validateParakeetURL(configuration.ParakeetURL); err != nil {
+		return errors.Wrap(err, "invalid ParakeetURL setting")
+	}
+
 	p.setConfiguration(configuration)
 
 	return nil

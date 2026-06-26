@@ -35,7 +35,7 @@
             {
                 "key": "ParakeetAPIKey",
                 "display_name": "Parakeet API Key",
-                "type": "text",
+                "type": "password",
                 "help_text": "Optional API key matching PARAKEET_API_KEY on the Parakeet server.",
                 "default": ""
             },

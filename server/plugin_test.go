@@ -116,3 +116,31 @@ func TestTranscribeEndpointMissingAudio(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
+
+func TestTranscribeEndpointHidesParakeetErrorDetails(t *testing.T) {
+	parakeetServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		http.Error(w, "internal onnx failure with secret details", http.StatusInternalServerError)
+	}))
+	defer parakeetServer.Close()
+
+	plugin := setupTestPlugin(parakeetServer.URL)
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("audio", "recording.webm")
+	require.NoError(t, err)
+	_, err = part.Write([]byte("fake-audio-data"))
+	require.NoError(t, err)
+	require.NoError(t, writer.Close())
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodPost, "/api/v1/transcribe", body)
+	r.Header.Set("Content-Type", writer.FormDataContentType())
+	r.Header.Set("Mattermost-User-ID", "test-user-id")
+
+	plugin.ServeHTTP(nil, w, r)
+
+	assert.Equal(t, http.StatusBadGateway, w.Code)
+	assert.Equal(t, clientErrorTranscriptionFailed+"\n", w.Body.String())
+	assert.NotContains(t, w.Body.String(), "secret details")
+}
