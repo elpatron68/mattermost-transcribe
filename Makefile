@@ -26,7 +26,20 @@ default: all
 # Verify environment, and define PLUGIN_ID, PLUGIN_VERSION, HAS_SERVER and HAS_WEBAPP as needed.
 include build/setup.mk
 
-BUNDLE_NAME ?= $(PLUGIN_ID)-$(PLUGIN_VERSION).tar.gz
+# Append commit hash to bundle name for untagged dev builds.
+BUILD_HASH_SHORT ?= $(shell git rev-parse --short HEAD 2>/dev/null)
+GIT_RELEASE_TAG_AT_HEAD := $(strip $(shell git tag --points-at HEAD 2>/dev/null | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(-rc[0-9]+)?$$' | head -1))
+ifeq ($(GIT_RELEASE_TAG_AT_HEAD),)
+ifneq ($(BUILD_HASH_SHORT),)
+BUNDLE_VERSION := $(PLUGIN_VERSION)+$(BUILD_HASH_SHORT)
+else
+BUNDLE_VERSION := $(PLUGIN_VERSION)
+endif
+else
+BUNDLE_VERSION := $(PLUGIN_VERSION)
+endif
+
+BUNDLE_NAME ?= $(PLUGIN_ID)-$(BUNDLE_VERSION).tar.gz
 
 # Include custom makefile, if present
 ifneq ($(wildcard build/custom.mk),)
@@ -44,7 +57,7 @@ endif
 # Used for semver bumping
 PROTECTED_BRANCH := master
 APP_NAME    := $(shell basename -s .git `git config --get remote.origin.url`)
-CURRENT_VERSION := $(strip $(shell git describe --abbrev=0 --tags))
+CURRENT_VERSION := $(strip $(shell git describe --abbrev=0 --tags 2>/dev/null))
 LATEST_RELEASE_TAG_RAW := $(shell git tag -l "v*" --sort=-v:refname | grep -v '\-rc' | head -n 1 || true)
 LATEST_RELEASE_TAG := $(strip $(LATEST_RELEASE_TAG_RAW))
 ifeq ($(LATEST_RELEASE_TAG),)
