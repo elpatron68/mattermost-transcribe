@@ -1,6 +1,6 @@
 # Mattermost Transcribe Plugin
 
-Record voice in Mattermost, transcribe it with [Parakeet](https://github.com/achetronic/parakeet) ASR, review the text, and send it as a channel message.
+Record voice in Mattermost, transcribe it with on-premises [Parakeet](https://github.com/achetronic/parakeet) ASR, review the text, and send it as a channel message.
 
 **Plugin ID:** `de.medisoftware.mattermost-transcribe`  
 **Current version:** 0.1.0
@@ -93,6 +93,20 @@ These notes come from running Parakeet behind this plugin in production-like tes
 - Optional **scheduled restart** (e.g. nightly `docker restart`) as a workaround until upstream improves memory release.
 - Monitor with `docker stats` and `free -h`; alert on sustained high container memory or failed `/health`.
 
+### Stable production outcome
+
+After applying the recommended compose settings (`-workers 1`, `mem_limit: 8g`, `cpus: 8`, healthcheck) on a **16 GiB / 16 vCPU** Proxmox LXC with **2 GiB swap**, behaviour stabilised for ~30 Mattermost users:
+
+| Metric | Idle | During transcription |
+|--------|------|----------------------|
+| RAM | ~2.4 GiB (~15 % of 16 GiB), flat over hours | Short spike, then returns to baseline |
+| CPU | ~0 % | Peak ~90 %, drops to idle when the job finishes |
+| Swap | 0 % used | Not needed under normal load |
+
+CPU and network spikes align with active transcription only — no sustained high load after jobs complete. This is the expected healthy pattern. The earlier stepwise RAM growth to 100 % was seen on smaller VMs (4–8 GiB) **before** explicit `-workers 1`, `mem_limit`, and swap were in place.
+
+Continue to watch RAM over days of regular use; a slow climb would indicate retention accumulating again and may warrant a scheduled container restart.
+
 **nginx / upload size (Mattermost plugin bundle, not Parakeet):** ensure `client_max_body_size` is **≥ 100M** in every nginx `location` that handles plugin uploads — a global 50M limit caused HTTP 413 for our ~63 MB bundle even when other blocks allowed 100M.
 
 ## Installation
@@ -122,6 +136,15 @@ The bundle is about 60–65 MB (all platform binaries). Ensure upload limits all
 3. Speak, then click **Stop & Transcribe**.
 4. Review and edit the transcript in the dialog.
 5. Click **Send** to post, or **Discard** to cancel.
+
+## Screenshots
+
+> Screenshots for the Marketplace listing are not yet committed. Capture them following
+> [docs/screenshots/README.md](docs/screenshots/README.md), then add images here:
+>
+> - Message input with microphone button
+> - Recording overlay with level meter
+> - Review dialog before sending
 
 ## Architecture
 
@@ -184,6 +207,26 @@ GitHub Actions workflow [`.github/workflows/build.yml`](.github/workflows/build.
 - **Test** — `make test-ci` on push/PR to `master`
 - **Build** — `make dist`, uploads the `.tar.gz` as an artifact
 - **Release** — on tags `v*`, attaches the bundle to a GitHub Release
+
+See [CHANGELOG.md](CHANGELOG.md) for version history.
+
+## Mattermost Marketplace
+
+This plugin is prepared for future publication to the [Mattermost Marketplace](https://mattermost.com/marketplace/).
+Internal installation via System Console does not require Marketplace listing.
+
+Before submitting:
+
+1. Complete the checklist in [docs/MARKETPLACE.md](docs/MARKETPLACE.md)
+2. Release **v1.0.0** (Marketplace expects a non-beta version)
+3. Add screenshots to [docs/screenshots/](docs/screenshots/) and embed them in this README
+4. Submit the [Marketplace contribution form](https://developers.mattermost.com/integrate/marketplace-submissions/)
+5. Request review in **Integrations and Apps** on the [Mattermost Community Server](https://community.mattermost.com)
+
+## Security
+
+Report vulnerabilities per [SECURITY.md](SECURITY.md). Use GitHub Security Advisories or
+security@medisoftware.de — please do not file public issues for security bugs.
 
 ## Limitations
 
