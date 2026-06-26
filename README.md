@@ -75,6 +75,8 @@ docker ps   # STATUS should include (healthy)
 
 If Mattermost and Parakeet run in Docker on the same network, use the container hostname (e.g. `http://parakeet:5092`) instead of `localhost`.
 
+**Mattermost QA / reviewers:** see [docs/PARAKEET-QA.md](docs/PARAKEET-QA.md) for a minimal Docker stack and version requirements.
+
 ### Operations notes (MediSoftware experience)
 
 These notes come from running Parakeet behind this plugin in production-like tests.
@@ -205,7 +207,8 @@ cp .env.example .env
 docker compose up -d
 ```
 
-See [mattermost-server-dev/README.md](mattermost-server-dev/README.md) for details.
+See [mattermost-server-dev/README.md](mattermost-server-dev/README.md) for details.  
+For Parakeet (required for transcription), see [docs/PARAKEET-QA.md](../docs/PARAKEET-QA.md).
 
 Enable plugin uploads in `config.json`, then:
 

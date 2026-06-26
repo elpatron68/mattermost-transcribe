@@ -1,0 +1,22 @@
+services:
+  parakeet:
+    image: ghcr.io/achetronic/parakeet:${PARAKEET_IMAGE_TAG:-0.5.0-int8}
+    ports:
+      - "${PARAKEET_PORT:-5092}:5092"
+    environment:
+      PARAKEET_API_KEY: ${PARAKEET_API_KEY:-qa-test-key}
+    command:
+      - "-models"
+      - "/models"
+      - "-workers"
+      - "1"
+      - "-log-level"
+      - "info"
+    mem_limit: 4g
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5092/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s

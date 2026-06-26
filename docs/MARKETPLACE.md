@@ -60,8 +60,8 @@ Transcribe adds voice-to-text to Mattermost using a self-hosted [Parakeet](https
 ### External dependency (Parakeet)
 
 - [x] Parakeet setup documented in README (Docker Compose, production notes)
-- [ ] Offer Mattermost reviewers a **test Parakeet endpoint** or step-by-step Docker instructions they can run
-- [ ] Document minimum Parakeet version / image tag if you pin one in production
+- [x] Step-by-step Docker instructions for reviewers — [PARAKEET-QA.md](PARAKEET-QA.md) and [`parakeet-qa/`](parakeet-qa/)
+- [x] Minimum / pinned Parakeet version documented — `0.4.0-int8` minimum, `0.5.0-int8` tested (see [PARAKEET-QA.md](PARAKEET-QA.md#supported-parakeet-versions))
 
 ### Quality and review (Mattermost-led)
 

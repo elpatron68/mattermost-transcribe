@@ -1,0 +1,14 @@
+# Attach Parakeet to the mattermost-server-dev Compose network.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.mm-dev.yml up -d
+#
+# Prerequisite: mattermost-server-dev stack already running (creates network mattermost-server-dev_default).
+
+services:
+  parakeet:
+    networks:
+      - mm_dev
+
+networks:
+  mm_dev:
+    external: true
+    name: mattermost-server-dev_default
