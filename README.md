@@ -232,19 +232,6 @@ GitHub Actions workflow [`.github/workflows/build.yml`](.github/workflows/build.
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
 
-## Mattermost Marketplace
-
-This plugin is prepared for future publication to the [Mattermost Marketplace](https://mattermost.com/marketplace/).
-Internal installation via System Console does not require Marketplace listing.
-
-Before submitting:
-
-1. Complete the checklist in [docs/MARKETPLACE.md](docs/MARKETPLACE.md)
-2. Release **v1.0.0** (Marketplace expects a non-beta version)
-3. Add screenshots to [docs/screenshots/](docs/screenshots/) and embed them in this README — done
-4. Submit the [Marketplace contribution form](https://developers.mattermost.com/integrate/marketplace-submissions/)
-5. Request review in **Integrations and Apps** on the [Mattermost Community Server](https://community.mattermost.com)
-
 ## Security
 
 Report vulnerabilities per [SECURITY.md](SECURITY.md). Use GitHub Security Advisories or
@@ -262,4 +249,4 @@ security@medisoftware.de — please do not file public issues for security bugs.
 ## License
 
 MIT License — see [LICENSE](LICENSE).  
-Copyright (c) 2026 MediSoftware GmbH.
+Copyright (c) 2026 MediSoftware GmbH & Co. KG
