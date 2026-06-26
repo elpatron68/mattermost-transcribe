@@ -9,3 +9,5 @@ export const CANCEL_RECORDING = 'transcribe/cancel_recording';
 export const UPDATE_RECORDING = 'transcribe/update_recording';
 export const SET_LOADING = 'transcribe/set_loading';
 export const SET_RECORDING_CONTEXT = 'transcribe/set_recording_context';
+export const SET_TRANSCRIPTION_TEXT = 'transcribe/set_transcription_text';
+export const CLEAR_TRANSCRIPTION_TEXT = 'transcribe/clear_transcription_text';

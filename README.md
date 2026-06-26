@@ -64,12 +64,25 @@ The bundle is written to `dist/de.medisoftware.mattermost-transcribe.tar.gz`.
 
 ### WSL
 
+Run `make` from a **WSL shell**, not from PowerShell or cmd. The build uses Linux `go` and `npm`; Windows binaries under `/mnt/c/Program Files/...` are ignored.
+
+One-time setup in WSL:
+
+```bash
+cd /mnt/c/Users/markus.MEDISOFT/source/repos/mattermost-transcribe
+bash scripts/install-wsl-node.sh
+```
+
+That installs [nvm](https://github.com/nvm-sh/nvm) and Node.js (version from `.nvmrc`). Go is expected at `~/.local/go/bin/go` or on `PATH`.
+
+Build:
+
 ```bash
 cd /mnt/c/Users/markus.MEDISOFT/source/repos/mattermost-transcribe
 make dist
 ```
 
-Ensure `go`, `node`, `npm`, and `python3` are available in WSL.
+Required in WSL: `go`, `node`, `npm`, `make`, and `python3`.
 
 ### Development
 

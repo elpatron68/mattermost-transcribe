@@ -9,16 +9,19 @@ import type {GlobalState} from '@mattermost/types/store';
 
 import {
     CANCEL_RECORDING,
+    CLEAR_TRANSCRIPTION_TEXT,
     CLOSE_RECORDING_MODAL,
     OPEN_RECORDING_MODAL,
     SET_LOADING,
     SET_RECORDING_CONTEXT,
+    SET_TRANSCRIPTION_TEXT,
     START_RECORDING,
     STOP_RECORDING,
     UPDATE_RECORDING,
 } from '../action_types';
 import Client from '../client';
 import {getMessageFromState} from '../i18n';
+import {transcriptionText as selectTranscriptionText} from '../selectors';
 
 let client: Client | null = null;
 
@@ -113,7 +116,7 @@ async function showError(dispatch: Dispatch, state: GlobalState, channelId: stri
     }
 }
 
-async function transcribeAndPost(
+async function transcribeForReview(
     dispatch: Dispatch,
     getState: () => GlobalState,
     channelId: string,
@@ -121,7 +124,6 @@ async function transcribeAndPost(
 ): Promise<void> {
     const state = getState();
     const resolvedChannelId = resolveChannelId(state, channelId);
-    const resolvedRootId = resolveRootId(state, rootId);
 
     if (!resolvedChannelId) {
         await showError(
@@ -145,7 +147,7 @@ async function transcribeAndPost(
             throw new Error('No speech detected in recording');
         }
 
-        await getClient().createTextPost(resolvedChannelId, resolvedRootId, text.trim());
+        dispatch({type: SET_TRANSCRIPTION_TEXT, text: text.trim()});
     } catch (error) {
         const message = error instanceof Error ? error.message : getMessageFromState(
             getState(),
@@ -153,11 +155,46 @@ async function transcribeAndPost(
             'Unknown error',
         );
         await showError(dispatch, getState(), resolvedChannelId, message);
+        closeRecordingModal()(dispatch);
     } finally {
         dispatch({type: SET_LOADING, loading: false});
-        closeRecordingModal()(dispatch);
     }
 }
+
+export const updateTranscriptionText = (text: string) => (dispatch: Dispatch) => {
+    dispatch({type: SET_TRANSCRIPTION_TEXT, text});
+};
+
+export const sendTranscription = (channelId: string, rootId: string) => async (
+    dispatch: Dispatch,
+    getState: () => GlobalState,
+) => {
+    const state = getState();
+    const resolvedChannelId = resolveChannelId(state, channelId);
+    const resolvedRootId = resolveRootId(state, rootId);
+    const message = selectTranscriptionText(state).trim();
+
+    if (!resolvedChannelId || !message) {
+        return;
+    }
+
+    dispatch({type: SET_LOADING, loading: true});
+
+    try {
+        await getClient().createTextPost(resolvedChannelId, resolvedRootId, message);
+        dispatch({type: CLEAR_TRANSCRIPTION_TEXT});
+        closeRecordingModal()(dispatch);
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : getMessageFromState(
+            getState(),
+            'transcribe.error.unknown',
+            'Unknown error',
+        );
+        await showError(dispatch, getState(), resolvedChannelId, errorMessage);
+    } finally {
+        dispatch({type: SET_LOADING, loading: false});
+    }
+};
 
 export const openRecordingModal = () => (dispatch: Dispatch) => {
     dispatch({type: OPEN_RECORDING_MODAL});
@@ -176,7 +213,7 @@ export const cancelRecording = () => (dispatch: Dispatch) => {
 export const stopAndTranscribe = (channelId: string, rootId: string) => (
     dispatch: Dispatch,
     getState: () => GlobalState,
-) => transcribeAndPost(dispatch, getState, channelId, rootId);
+) => transcribeForReview(dispatch, getState, channelId, rootId);
 
 export const recordTranscription = (channelId: string, rootId: string) => async (
     dispatch: Dispatch,
@@ -195,7 +232,7 @@ export const recordTranscription = (channelId: string, rootId: string) => async 
                 dispatch({type: UPDATE_RECORDING, duration, level});
             },
             () => {
-                transcribeAndPost(dispatch, getState, channelId, rootId);
+                transcribeForReview(dispatch, getState, channelId, rootId);
             },
         );
         dispatch({type: START_RECORDING});

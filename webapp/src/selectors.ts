@@ -12,6 +12,7 @@ type PluginState = {
     isLoading: boolean;
     channelId: string;
     rootId: string;
+    transcriptionText: string;
 };
 
 function getPluginState(state: GlobalState): PluginState | undefined {
@@ -40,4 +41,8 @@ export function recordingChannelId(state: GlobalState): string {
 
 export function recordingRootId(state: GlobalState): string {
     return getPluginState(state)?.rootId ?? '';
+}
+
+export function transcriptionText(state: GlobalState): string {
+    return getPluginState(state)?.transcriptionText ?? '';
 }

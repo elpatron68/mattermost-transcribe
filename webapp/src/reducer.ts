@@ -5,10 +5,12 @@ import {combineReducers} from 'redux';
 
 import {
     CANCEL_RECORDING,
+    CLEAR_TRANSCRIPTION_TEXT,
     CLOSE_RECORDING_MODAL,
     OPEN_RECORDING_MODAL,
     SET_LOADING,
     SET_RECORDING_CONTEXT,
+    SET_TRANSCRIPTION_TEXT,
     START_RECORDING,
     STOP_RECORDING,
     UPDATE_RECORDING,
@@ -84,6 +86,19 @@ const rootId = (state = '', action: {type: string; rootId?: string}) => {
     }
 };
 
+const transcriptionText = (state = '', action: {type: string; text?: string}) => {
+    switch (action.type) {
+    case SET_TRANSCRIPTION_TEXT:
+        return action.text ?? '';
+    case CLEAR_TRANSCRIPTION_TEXT:
+    case CLOSE_RECORDING_MODAL:
+    case CANCEL_RECORDING:
+        return '';
+    default:
+        return state;
+    }
+};
+
 export default combineReducers({
     recordingModalVisible,
     recordingDuration,
@@ -91,4 +106,5 @@ export default combineReducers({
     isLoading,
     channelId,
     rootId,
+    transcriptionText,
 });

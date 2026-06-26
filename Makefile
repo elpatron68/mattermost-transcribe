@@ -230,7 +230,7 @@ endif
 ## Ensures NPM dependencies are installed without having to run this all the time.
 webapp/node_modules: $(wildcard webapp/package.json)
 ifneq ($(HAS_WEBAPP),)
-	cd webapp && $(NPM) install
+	cd webapp && "$(NPM)" install
 	touch $@
 endif
 
@@ -239,9 +239,9 @@ endif
 webapp: webapp/node_modules
 ifneq ($(HAS_WEBAPP),)
 ifeq ($(MM_DEBUG),)
-	cd webapp && $(NPM) run build;
+	cd webapp && "$(NPM)" run build;
 else
-	cd webapp && $(NPM) run debug;
+	cd webapp && "$(NPM)" run debug;
 endif
 endif
 
@@ -291,9 +291,9 @@ deploy: dist
 .PHONY: watch
 watch: apply server bundle
 ifeq ($(MM_DEBUG),)
-	cd webapp && $(NPM) run build:watch
+	cd webapp && "$(NPM)" run build:watch
 else
-	cd webapp && $(NPM) run debug:watch
+	cd webapp && "$(NPM)" run debug:watch
 endif
 
 ## Installs a previous built plugin with updated webpack assets to a server.
@@ -348,7 +348,7 @@ ifneq ($(HAS_SERVER),)
 	$(GOBIN)/gotestsum -- -v ./...
 endif
 ifneq ($(HAS_WEBAPP),)
-	cd webapp && $(NPM) run test;
+	cd webapp && "$(NPM)" run test;
 endif
 
 ## Runs any lints and unit tests defined for the server and webapp, if they exist, optimized
@@ -359,7 +359,7 @@ ifneq ($(HAS_SERVER),)
 	$(GOBIN)/gotestsum --format standard-verbose --junitfile report.xml -- ./...
 endif
 ifneq ($(HAS_WEBAPP),)
-	cd webapp && $(NPM) run test;
+	cd webapp && "$(NPM)" run test;
 endif
 
 ## Creates a coverage report for the server code.
