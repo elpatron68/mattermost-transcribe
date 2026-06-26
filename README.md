@@ -151,6 +151,10 @@ Review dialog before sending:
 
 ![Review dialog](docs/screenshots/review-dialog.png)
 
+Plugin settings in System Console:
+
+![Plugin settings](docs/screenshots/plugin-settings.png)
+
 ## Architecture
 
 ```
@@ -192,6 +196,16 @@ bash scripts/install-wsl-node.sh
 Go is expected at `~/.local/go/bin/go` or on `PATH`. Prefer cloning the repo on the Linux filesystem (`~/...`) rather than `/mnt/c/...` for faster builds and fewer line-ending issues.
 
 ### Development
+
+Start a local Mattermost test server (Docker):
+
+```bash
+cd mattermost-server-dev
+cp .env.example .env
+docker compose up -d
+```
+
+See [mattermost-server-dev/README.md](mattermost-server-dev/README.md) for details.
 
 Enable plugin uploads in `config.json`, then:
 
