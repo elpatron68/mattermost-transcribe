@@ -1,1 +1,6 @@
-{}
+{
+    "transcribe.file_upload.label": "Transcribe",
+    "transcribe.modal.cancel": "Cancel",
+    "transcribe.modal.stop": "Stop & Transcribe",
+    "transcribe.modal.transcribing": "Transcribing..."
+}

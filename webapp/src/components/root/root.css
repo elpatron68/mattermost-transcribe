@@ -1,0 +1,48 @@
+.recording-modal__overlay {
+    position: absolute;
+    display: flex;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.recording-modal__panel {
+    display: flex;
+    align-items: center;
+    padding: 0.5em;
+    font-size: 1.3em;
+}
+
+.recording-modal__icon {
+    color: red;
+    padding: 0.5em;
+}
+
+.recording-modal__duration {
+    padding: 0.5em;
+    min-width: 4em;
+    text-align: center;
+}
+
+.recording-modal__button {
+    background: none;
+    border: none;
+    outline: inherit;
+    padding: 0.5em;
+    cursor: pointer;
+}
+
+.recording-modal__button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.recording-modal__status {
+    padding: 0.5em;
+    font-size: 0.85em;
+}

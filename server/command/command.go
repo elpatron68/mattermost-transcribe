@@ -14,19 +14,17 @@ type Handler struct {
 
 type Command interface {
 	Handle(args *model.CommandArgs) (*model.CommandResponse, error)
-	executeHelloCommand(args *model.CommandArgs) *model.CommandResponse
 }
 
-const helloCommandTrigger = "hello"
+const transcribeCommandTrigger = "transcribe"
 
-// Register all your slash commands in the NewCommandHandler function.
 func NewCommandHandler(client *pluginapi.Client) Command {
 	err := client.SlashCommand.Register(&model.Command{
-		Trigger:          helloCommandTrigger,
+		Trigger:          transcribeCommandTrigger,
 		AutoComplete:     true,
-		AutoCompleteDesc: "Say hello to someone",
-		AutoCompleteHint: "[@username]",
-		AutocompleteData: model.NewAutocompleteData(helloCommandTrigger, "[@username]", "Username to say hello to"),
+		AutoCompleteDesc: "Record audio and post a transcription",
+		AutoCompleteHint: "",
+		AutocompleteData: model.NewAutocompleteData(transcribeCommandTrigger, "", "Record audio and post a transcription"),
 	})
 	if err != nil {
 		client.Log.Error("Failed to register command", "error", err)
@@ -36,7 +34,6 @@ func NewCommandHandler(client *pluginapi.Client) Command {
 	}
 }
 
-// ExecuteCommand hook calls this method to execute the commands that were registered in the NewCommandHandler function.
 func (c *Handler) Handle(args *model.CommandArgs) (*model.CommandResponse, error) {
 	fields := strings.Fields(args.Command)
 	if len(fields) == 0 {
@@ -45,27 +42,17 @@ func (c *Handler) Handle(args *model.CommandArgs) (*model.CommandResponse, error
 			Text:         "Empty command",
 		}, nil
 	}
+
 	trigger := strings.TrimPrefix(fields[0], "/")
-	switch trigger {
-	case helloCommandTrigger:
-		return c.executeHelloCommand(args), nil
-	default:
+	if trigger != transcribeCommandTrigger {
 		return &model.CommandResponse{
 			ResponseType: model.CommandResponseTypeEphemeral,
 			Text:         fmt.Sprintf("Unknown command: %s", args.Command),
 		}, nil
 	}
-}
 
-func (c *Handler) executeHelloCommand(args *model.CommandArgs) *model.CommandResponse {
-	if len(strings.Fields(args.Command)) < 2 {
-		return &model.CommandResponse{
-			ResponseType: model.CommandResponseTypeEphemeral,
-			Text:         "Please specify a username",
-		}
-	}
-	username := strings.Fields(args.Command)[1]
 	return &model.CommandResponse{
-		Text: "Hello, " + username,
-	}
+		ResponseType: model.CommandResponseTypeEphemeral,
+		Text:         "Use the microphone button in the message input to start recording.",
+	}, nil
 }

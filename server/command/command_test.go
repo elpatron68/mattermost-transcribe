@@ -25,23 +25,24 @@ func setupTest() *env {
 	}
 }
 
-func TestHelloCommand(t *testing.T) {
+func TestTranscribeCommand(t *testing.T) {
 	assert := assert.New(t)
 	env := setupTest()
 
 	env.api.On("RegisterCommand", &model.Command{
-		Trigger:          helloCommandTrigger,
+		Trigger:          transcribeCommandTrigger,
 		AutoComplete:     true,
-		AutoCompleteDesc: "Say hello to someone",
-		AutoCompleteHint: "[@username]",
-		AutocompleteData: model.NewAutocompleteData("hello", "[@username]", "Username to say hello to"),
+		AutoCompleteDesc: "Record audio and post a transcription",
+		AutoCompleteHint: "",
+		AutocompleteData: model.NewAutocompleteData("transcribe", "", "Record audio and post a transcription"),
 	}).Return(nil)
 	cmdHandler := NewCommandHandler(env.client)
 
 	args := &model.CommandArgs{
-		Command: "/hello world",
+		Command: "/transcribe",
 	}
 	response, err := cmdHandler.Handle(args)
 	assert.Nil(err)
-	assert.Equal("Hello, world", response.Text)
+	assert.Equal(model.CommandResponseTypeEphemeral, response.ResponseType)
+	assert.Contains(response.Text, "microphone button")
 }

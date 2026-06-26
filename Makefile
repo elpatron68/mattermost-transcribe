@@ -265,11 +265,11 @@ ifneq ($(HAS_WEBAPP),)
 	mkdir -p dist/$(PLUGIN_ID)/webapp
 	cp -r webapp/dist dist/$(PLUGIN_ID)/webapp/
 endif
-ifeq ($(shell uname),Darwin)
-	cd dist && tar --disable-copyfile -cvzf $(BUNDLE_NAME) $(PLUGIN_ID)
-else
-	cd dist && tar -cvzf $(BUNDLE_NAME) $(PLUGIN_ID)
+ifneq ($(HAS_SERVER),)
+	chmod +x dist/$(PLUGIN_ID)/server/dist/plugin-linux-amd64 2>/dev/null || true
+	chmod +x dist/$(PLUGIN_ID)/server/dist/plugin-linux-arm64 2>/dev/null || true
 endif
+	python3 build/package_bundle.py dist/$(PLUGIN_ID) dist/$(BUNDLE_NAME) || python build/package_bundle.py dist/$(PLUGIN_ID) dist/$(BUNDLE_NAME)
 
 	@echo plugin built at: dist/$(BUNDLE_NAME)
 
@@ -436,5 +436,5 @@ help:
 mock:
 ifneq ($(HAS_SERVER),)
 	go install go.uber.org/mock/mockgen@v0.6.0
-	mockgen -destination=server/command/mocks/mock_commands.go -package=mocks github.com/mattermost/mattermost-plugin-starter-template/server/command Command
+	mockgen -destination=server/command/mocks/mock_commands.go -package=mocks github.com/medisoft/mattermost-transcribe/server/command Command
 endif

@@ -1,9 +1,9 @@
 {
-    "id": "com.mattermost.plugin-starter-template",
-    "name": "Plugin Starter Template",
-    "description": "This plugin serves as a starting point for writing a Mattermost plugin.",
-    "homepage_url": "https://github.com/mattermost/mattermost-plugin-starter-template",
-    "support_url": "https://github.com/mattermost/mattermost-plugin-starter-template/issues",
+    "id": "com.medisoft.mattermost-transcribe",
+    "name": "Transcribe",
+    "description": "Record voice messages and post transcriptions powered by Parakeet ASR.",
+    "homepage_url": "https://github.com/medisoft/mattermost-transcribe",
+    "support_url": "https://github.com/medisoft/mattermost-transcribe/issues",
     "icon_path": "assets/starter-template-icon.svg",
     "min_server_version": "6.2.1",
     "server": {
@@ -19,8 +19,38 @@
         "bundle_path": "webapp/dist/main.js"
     },
     "settings_schema": {
-        "header": "",
-        "footer": "",
-        "settings": []
+        "header": "Configure the external Parakeet ASR server (Whisper-compatible API).",
+        "footer": "Parakeet must be running separately, e.g. via Docker. See the plugin README for setup instructions.",
+        "settings": [
+            {
+                "key": "ParakeetURL",
+                "display_name": "Parakeet Server URL",
+                "type": "text",
+                "help_text": "Base URL of the Parakeet server, e.g. http://parakeet:5092",
+                "placeholder": "http://localhost:5092",
+                "default": "http://localhost:5092"
+            },
+            {
+                "key": "ParakeetAPIKey",
+                "display_name": "Parakeet API Key",
+                "type": "text",
+                "help_text": "Optional API key matching PARAKEET_API_KEY on the Parakeet server.",
+                "default": ""
+            },
+            {
+                "key": "DefaultLanguage",
+                "display_name": "Default Language",
+                "type": "text",
+                "help_text": "ISO-639-1 language code sent to Parakeet (e.g. de, en).",
+                "default": "de"
+            },
+            {
+                "key": "MaxRecordingDuration",
+                "display_name": "Max Recording Duration (seconds)",
+                "type": "number",
+                "help_text": "Maximum length of a voice recording before it is stopped automatically.",
+                "default": 120
+            }
+        ]
     }
 }

@@ -1,28 +1,34 @@
 package main
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
+	"path/filepath"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/mattermost/mattermost/server/public/plugin"
+	"github.com/pkg/errors"
 )
 
-// initRouter initializes the HTTP router for the plugin.
+type clientConfigResponse struct {
+	MaxRecordingDuration int64 `json:"maxRecordingDuration"`
+}
+
 func (p *Plugin) initRouter() *mux.Router {
 	router := mux.NewRouter()
 
-	// Middleware to require that the user is logged in
 	router.Use(p.MattermostAuthorizationRequired)
 
 	apiRouter := router.PathPrefix("/api/v1").Subrouter()
 
-	apiRouter.HandleFunc("/hello", p.HelloWorld).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/config", p.GetClientConfig).Methods(http.MethodGet)
+	apiRouter.HandleFunc("/transcribe", p.HandleTranscribe).Methods(http.MethodPost)
 
 	return router
 }
 
-// ServeHTTP demonstrates a plugin that handles HTTP requests by greeting the world.
-// The root URL is currently <siteUrl>/plugins/com.mattermost.plugin-starter-template/api/v1/. Replace com.mattermost.plugin-starter-template with the plugin ID.
 func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
 	p.router.ServeHTTP(w, r)
 }
@@ -39,9 +45,67 @@ func (p *Plugin) MattermostAuthorizationRequired(next http.Handler) http.Handler
 	})
 }
 
-func (p *Plugin) HelloWorld(w http.ResponseWriter, r *http.Request) {
-	if _, err := w.Write([]byte("Hello, world!")); err != nil {
-		p.API.LogError("Failed to write response", "error", err)
+func (p *Plugin) GetClientConfig(w http.ResponseWriter, _ *http.Request) {
+	cfg := p.getConfiguration()
+	maxDuration := cfg.MaxRecordingDuration
+	if maxDuration <= 0 {
+		maxDuration = 120
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(clientConfigResponse{MaxRecordingDuration: maxDuration}); err != nil {
+		p.API.LogError("Failed to encode client config", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func (p *Plugin) HandleTranscribe(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseMultipartForm(maxAudioUploadSize); err != nil {
+		http.Error(w, "Failed to parse upload", http.StatusBadRequest)
+		return
+	}
+
+	file, header, err := r.FormFile("audio")
+	if err != nil {
+		http.Error(w, "Missing audio file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	audio, err := io.ReadAll(io.LimitReader(file, maxAudioUploadSize+1))
+	if err != nil {
+		http.Error(w, "Failed to read audio file", http.StatusBadRequest)
+		return
+	}
+	if len(audio) == 0 {
+		http.Error(w, "Audio file is empty", http.StatusBadRequest)
+		return
+	}
+	if len(audio) > maxAudioUploadSize {
+		http.Error(w, "Audio file exceeds maximum size", http.StatusBadRequest)
+		return
+	}
+
+	filename := "recording.webm"
+	if header != nil && header.Filename != "" {
+		filename = filepath.Base(header.Filename)
+	}
+
+	text, err := p.transcribeAudio(audio, filename)
+	if err != nil {
+		p.API.LogError("Transcription failed", "error", err)
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
+	}
+
+	if strings.TrimSpace(text) == "" {
+		http.Error(w, "No speech detected in recording", http.StatusUnprocessableEntity)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(transcribeResult{Text: text}); err != nil {
+		p.API.LogError("Failed to encode transcription response", "error", errors.Wrap(err, "encode failed"))
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
