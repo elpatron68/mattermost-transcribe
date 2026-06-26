@@ -1,13 +1,18 @@
 # Mattermost Transcribe Plugin
 
-Record voice in Mattermost and post the transcription as a text message, powered by [Parakeet](https://github.com/achetronic/parakeet) ASR.
+Record voice in Mattermost, transcribe it with [Parakeet](https://github.com/achetronic/parakeet) ASR, review the text, and send it as a channel message.
+
+**Plugin ID:** `de.medisoftware.mattermost-transcribe`  
+**Current version:** 0.1.0
 
 ## Features
 
 - Microphone button in the message input (next to file upload)
-- `/transcribe` slash command (opens recording in the web/desktop client)
+- `/transcribe` slash command (web/desktop client)
+- Live microphone level indicator while recording
+- **Review step** — edit the transcript before posting
 - Server-side proxy to Parakeet (API key stays on the server)
-- Posts transcribed text as a normal channel message
+- German and English UI strings
 
 ## Requirements
 
@@ -37,9 +42,20 @@ Verify the service:
 curl http://localhost:5092/health
 ```
 
-## Plugin Configuration
+If Mattermost and Parakeet run in Docker on the same network, use the container hostname (e.g. `http://parakeet:5092`) instead of `localhost`.
 
-Upload the plugin bundle via **System Console > Plugins > Plugin Management**, then configure:
+## Installation
+
+1. Build or download `dist/de.medisoftware.mattermost-transcribe-<version>.tar.gz`.
+2. Upload via **System Console → Plugins → Plugin Management**.
+3. Enable the plugin and configure Parakeet (see below).
+
+The bundle is about 60–65 MB (all platform binaries). Ensure upload limits allow it:
+
+- Mattermost `FileSettings.MaxFileSize` (default often 100 MB)
+- Reverse proxy `client_max_body_size` (e.g. nginx) must be **≥ 100M** in every `location` block that handles `/api/v4/plugins`
+
+## Plugin Configuration
 
 | Setting | Description | Default |
 |---------|-------------|---------|
@@ -48,7 +64,23 @@ Upload the plugin bundle via **System Console > Plugins > Plugin Management**, t
 | Default Language | ISO-639-1 code sent to Parakeet | `de` |
 | Max Recording Duration | Max seconds per recording | `120` |
 
-If Mattermost and Parakeet run in Docker on the same network, use the container hostname (e.g. `http://parakeet:5092`) instead of `localhost`.
+## Usage
+
+1. Open a channel in the web or desktop app.
+2. Click the microphone icon or type `/transcribe`.
+3. Speak, then click **Stop & Transcribe**.
+4. Review and edit the transcript in the dialog.
+5. Click **Send** to post, or **Discard** to cancel.
+
+## Architecture
+
+```
+Browser (MediaRecorder) → Plugin Server → Parakeet /v1/audio/transcriptions
+                                ↓
+                         Review in client → Text post
+```
+
+Audio is recorded as WebM in the browser. The plugin server forwards it to Parakeet's Whisper-compatible API and returns the transcript. The client does not post until the user confirms.
 
 ## Build
 
@@ -58,37 +90,27 @@ Recommended on Linux or WSL:
 make dist
 ```
 
-The bundle is written to `dist/de.medisoftware.mattermost-transcribe-<version>.tar.gz` (version from `plugin.json`, currently **0.1.0**).
+Output: `dist/de.medisoftware.mattermost-transcribe-<version>.tar.gz` (version from `plugin.json`).
 
-`make dist` uses `build/package_bundle.py` to set the executable bit on Linux plugin binaries in the archive. That avoids `permission denied` errors when Mattermost installs a bundle built on Windows.
+`make dist` uses `build/package_bundle.py` to set executable bits on Linux plugin binaries in the archive (avoids `permission denied` on install).
 
-### Versioning
+### Prerequisites
 
-The plugin version is defined in `plugin.json` (`version` field). Bump it for each release; `make dist` embeds it in the bundle name and in the installed plugin metadata.
-
-The Makefile also provides `make patch`, `make minor`, and `make major` targets that create signed git tags (`v*`) for release workflow — these complement, but do not replace, the version in `plugin.json`.
+- Go (see `go.mod`)
+- Node.js (see `.nvmrc`)
+- npm, make, python3
 
 ### WSL
 
-Run `make` from a **WSL shell**, not from PowerShell or cmd. The build uses Linux `go` and `npm`; Windows binaries under `/mnt/c/Program Files/...` are ignored.
+Run `make` from a **WSL shell**, not PowerShell or cmd. The Makefile prefers Linux `go`/`npm` over Windows binaries under `/mnt/c/Program Files/...`.
 
-One-time setup in WSL:
+One-time setup:
 
 ```bash
-cd /mnt/c/Users/markus.MEDISOFT/source/repos/mattermost-transcribe
 bash scripts/install-wsl-node.sh
 ```
 
-That installs [nvm](https://github.com/nvm-sh/nvm) and Node.js (version from `.nvmrc`). Go is expected at `~/.local/go/bin/go` or on `PATH`.
-
-Build:
-
-```bash
-cd /mnt/c/Users/markus.MEDISOFT/source/repos/mattermost-transcribe
-make dist
-```
-
-Required in WSL: `go`, `node`, `npm`, `make`, and `python3`.
+Go is expected at `~/.local/go/bin/go` or on `PATH`. Prefer cloning the repo on the Linux filesystem (`~/...`) rather than `/mnt/c/...` for faster builds and fewer line-ending issues.
 
 ### Development
 
@@ -100,28 +122,26 @@ export MM_ADMIN_TOKEN=your-token
 make watch
 ```
 
-## Usage
+### Versioning
 
-1. Open a channel in the web or desktop app.
-2. Click the microphone icon next to the file attachment button, or type `/transcribe`.
-3. Speak, then click **Stop & Transcribe**.
-4. The plugin sends the audio to Parakeet and posts the transcript as a text message.
+Set the release version in `plugin.json` (`version` field) before `make dist`. The Makefile also provides `make patch`, `make minor`, and `make major` for signed git tags (`v*`).
 
-## Architecture
+### CI
 
-```
-Browser (MediaRecorder) → Plugin Server → Parakeet /v1/audio/transcriptions → Text post
-```
+GitHub Actions workflow [`.github/workflows/build.yml`](.github/workflows/build.yml):
 
-Audio is recorded as WebM in the browser. The plugin server forwards it to Parakeet's Whisper-compatible API and returns the transcript to the client.
+- **Test** — `make test-ci` on push/PR to `master`
+- **Build** — `make dist`, uploads the `.tar.gz` as an artifact
+- **Release** — on tags `v*`, attaches the bundle to a GitHub Release
 
 ## Limitations
 
 - No mobile native app support (browser microphone APIs)
-- No streaming transcription in v1
+- No streaming transcription
 - Parakeet must be reachable from the Mattermost server
-- Maximum upload size is 25 MB (Parakeet limit)
+- Maximum audio upload to Parakeet is 25 MB
 
 ## License
 
-See [LICENSE](LICENSE).
+MIT License — see [LICENSE](LICENSE).  
+Copyright (c) 2026 MediSoftware GmbH.

@@ -1,13 +1,34 @@
+# Build artifacts
 bin/
 dist/
+
+# Generated manifests (from plugin.json via make apply)
 webapp/src/manifest.ts
 server/manifest.go
 
-# Mac
-.DS_Store
+# Test and coverage output
+report.xml
+coverage.txt
+coverage.out
+*.coverprofile
 
-# Jetbrains
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Cursor / IDE
+.cursor/
 .idea/
 
-# VS Code
-.vscode
+# VS Code (local editor settings)
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor backups
+*~
+*.swp
+*.swo
