@@ -58,9 +58,15 @@ Recommended on Linux or WSL:
 make dist
 ```
 
-The bundle is written to `dist/de.medisoftware.mattermost-transcribe.tar.gz`.
+The bundle is written to `dist/de.medisoftware.mattermost-transcribe-<version>.tar.gz` (version from `plugin.json`, currently **0.1.0**).
 
 `make dist` uses `build/package_bundle.py` to set the executable bit on Linux plugin binaries in the archive. That avoids `permission denied` errors when Mattermost installs a bundle built on Windows.
+
+### Versioning
+
+The plugin version is defined in `plugin.json` (`version` field). Bump it for each release; `make dist` embeds it in the bundle name and in the installed plugin metadata.
+
+The Makefile also provides `make patch`, `make minor`, and `make major` targets that create signed git tags (`v*`) for release workflow — these complement, but do not replace, the version in `plugin.json`.
 
 ### WSL
 
