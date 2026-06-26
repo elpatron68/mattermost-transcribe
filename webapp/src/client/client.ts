@@ -33,12 +33,16 @@ export default class Client {
     }
 
     async startRecording(
-        onUpdate: (duration: number) => void,
+        onUpdate: (duration: number, level: number) => void,
         onMaxDuration: () => void,
     ): Promise<void> {
         const config = await this.loadConfig();
         this.pendingRecording = null;
-        await this.recorder.start(config.maxRecordingDuration, onUpdate, onMaxDuration);
+        await this.recorder.start(
+            config.maxRecordingDuration,
+            ({duration, level}) => onUpdate(duration, level),
+            onMaxDuration,
+        );
     }
 
     cancelRecording(): void {

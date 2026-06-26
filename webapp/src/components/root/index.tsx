@@ -14,6 +14,7 @@ import {
     isTranscribing,
     recordingChannelId,
     recordingDuration,
+    recordingLevel,
     recordingRootId,
 } from 'selectors';
 
@@ -31,6 +32,7 @@ function mapStateToProps(state: GlobalState) {
     return {
         visible: isRecordingModalVisible(state),
         duration: recordingDuration(state),
+        level: recordingLevel(state),
         isLoading: isTranscribing(state),
         channelId: recordingChannelId(state) || state.entities.channels.currentChannelId,
         rootId: recordingRootId(state) || extendedState.views?.rhs?.selectedPostId || '',

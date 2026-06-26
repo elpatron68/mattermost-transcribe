@@ -13,27 +13,86 @@
 
 .recording-modal__panel {
     display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+    min-width: 16em;
+    padding: 0.85em 1em;
+    font-size: 1.1em;
+}
+
+.recording-modal__header {
+    display: flex;
     align-items: center;
-    padding: 0.5em;
-    font-size: 1.3em;
+    gap: 0.5em;
 }
 
 .recording-modal__icon {
-    color: red;
-    padding: 0.5em;
+    color: #d24b4e;
+    font-size: 1.1em;
+    line-height: 1;
+    transition: opacity 0.1s ease;
 }
 
 .recording-modal__duration {
-    padding: 0.5em;
-    min-width: 4em;
-    text-align: center;
+    min-width: 3.5em;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+.recording-modal__label {
+    font-size: 0.85em;
+    opacity: 0.75;
+}
+
+.recording-modal__meter {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45em;
+}
+
+.recording-modal__meter-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 0.25em;
+    height: 2.5em;
+}
+
+.recording-modal__meter-bar {
+    width: 0.45em;
+    border-radius: 2px;
+    transition: background-color 0.08s ease, opacity 0.08s ease;
+}
+
+.recording-modal__meter-bar--active {
+    opacity: 1;
+}
+
+.recording-modal__meter-track {
+    height: 0.35em;
+    border-radius: 999px;
+    background-color: rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.recording-modal__meter-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.1s ease;
+}
+
+.recording-modal__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.25em;
 }
 
 .recording-modal__button {
     background: none;
     border: none;
     outline: inherit;
-    padding: 0.5em;
+    padding: 0.35em 0.5em;
     cursor: pointer;
 }
 
@@ -43,6 +102,6 @@
 }
 
 .recording-modal__status {
-    padding: 0.5em;
-    font-size: 0.85em;
+    padding: 0.35em 0.5em;
+    font-size: 0.9em;
 }

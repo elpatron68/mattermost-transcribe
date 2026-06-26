@@ -8,6 +8,7 @@ import type {GlobalState} from '@mattermost/types/store';
 type PluginState = {
     recordingModalVisible: boolean;
     recordingDuration: number;
+    recordingLevel: number;
     isLoading: boolean;
     channelId: string;
     rootId: string;
@@ -23,6 +24,10 @@ export function isRecordingModalVisible(state: GlobalState): boolean {
 
 export function recordingDuration(state: GlobalState): number {
     return getPluginState(state)?.recordingDuration ?? 0;
+}
+
+export function recordingLevel(state: GlobalState): number {
+    return getPluginState(state)?.recordingLevel ?? 0;
 }
 
 export function isTranscribing(state: GlobalState): boolean {

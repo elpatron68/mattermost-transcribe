@@ -133,8 +133,8 @@ export const recordTranscription = (channelId: string, rootId: string) => async 
 
     try {
         await getClient().startRecording(
-            (duration) => {
-                dispatch({type: UPDATE_RECORDING, duration});
+            (duration, level) => {
+                dispatch({type: UPDATE_RECORDING, duration, level});
             },
             () => {
                 transcribeAndPost(dispatch, getState, channelId, rootId);

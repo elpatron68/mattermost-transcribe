@@ -1,6 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+export type RecordingUpdate = {
+    duration: number;
+    level: number;
+};
+
 export type RecordingResult = {
     blob: Blob;
     duration: number;
@@ -30,17 +35,19 @@ function extensionForMimeType(mimeType: string): string {
 export class AudioRecorder {
     private mediaRecorder: MediaRecorder | null = null;
     private stream: MediaStream | null = null;
+    private audioContext: AudioContext | null = null;
+    private analyser: AnalyserNode | null = null;
     private chunks: Blob[] = [];
     private mimeType = '';
     private startTime = 0;
     private updateTimer: ReturnType<typeof setInterval> | null = null;
     private maxDurationTimer: ReturnType<typeof setTimeout> | null = null;
-    private onUpdate: ((duration: number) => void) | null = null;
+    private onUpdate: ((update: RecordingUpdate) => void) | null = null;
     private onMaxDuration: (() => void) | null = null;
 
     async start(
         maxDurationSeconds: number,
-        onUpdate: (duration: number) => void,
+        onUpdate: (update: RecordingUpdate) => void,
         onMaxDuration: () => void,
     ): Promise<void> {
         this.onUpdate = onUpdate;
@@ -48,6 +55,7 @@ export class AudioRecorder {
         this.chunks = [];
 
         this.stream = await navigator.mediaDevices.getUserMedia({audio: true});
+        this.setupLevelMonitoring(this.stream);
         this.mimeType = getSupportedMimeType();
 
         const options = this.mimeType ? {mimeType: this.mimeType} : undefined;
@@ -63,15 +71,54 @@ export class AudioRecorder {
 
         this.updateTimer = setInterval(() => {
             if (this.onUpdate) {
-                this.onUpdate(Date.now() - this.startTime);
+                this.onUpdate({
+                    duration: Date.now() - this.startTime,
+                    level: this.measureLevel(),
+                });
             }
-        }, 200);
+        }, 100);
 
         this.maxDurationTimer = setTimeout(() => {
             if (this.onMaxDuration) {
                 this.onMaxDuration();
             }
         }, maxDurationSeconds * 1000);
+    }
+
+    private setupLevelMonitoring(stream: MediaStream): void {
+        this.audioContext = new AudioContext();
+        this.analyser = this.audioContext.createAnalyser();
+        this.analyser.fftSize = 512;
+        this.analyser.smoothingTimeConstant = 0.5;
+
+        const source = this.audioContext.createMediaStreamSource(stream);
+        source.connect(this.analyser);
+    }
+
+    private measureLevel(): number {
+        if (!this.analyser) {
+            return 0;
+        }
+
+        const buffer = new Uint8Array(this.analyser.fftSize);
+        this.analyser.getByteTimeDomainData(buffer);
+
+        let sumSquares = 0;
+        for (let i = 0; i < buffer.length; i++) {
+            const sample = (buffer[i] - 128) / 128;
+            sumSquares += sample * sample;
+        }
+
+        const rms = Math.sqrt(sumSquares / buffer.length);
+        return Math.min(1, rms * 6);
+    }
+
+    private teardownLevelMonitoring(): void {
+        if (this.audioContext) {
+            void this.audioContext.close();
+        }
+        this.audioContext = null;
+        this.analyser = null;
     }
 
     private clearTimers(): void {
@@ -86,6 +133,7 @@ export class AudioRecorder {
     }
 
     private stopTracks(): void {
+        this.teardownLevelMonitoring();
         if (this.stream) {
             this.stream.getTracks().forEach((track) => track.stop());
             this.stream = null;

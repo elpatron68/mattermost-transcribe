@@ -4,11 +4,13 @@
 import React from 'react';
 import {changeOpacity} from 'mattermost-redux/utils/theme_utils';
 
+import LevelMeter from './level_meter';
 import './root.css';
 
 type Props = {
     visible: boolean;
     duration: number;
+    level: number;
     isLoading: boolean;
     channelId: string;
     rootId: string;
@@ -18,6 +20,7 @@ type Props = {
         centerChannelBg: string;
         centerChannelColor: string;
         linkColor: string;
+        errorTextColor: string;
     };
 };
 
@@ -47,6 +50,8 @@ export default class Root extends React.PureComponent<Props> {
         }
 
         const style = getStyle(this.props.theme);
+        const isRecording = !this.props.isLoading;
+        const pulseOpacity = 0.45 + (this.props.level * 0.55);
 
         return (
             <div style={style.overlay}>
@@ -54,39 +59,58 @@ export default class Root extends React.PureComponent<Props> {
                     style={style.panel}
                     className='recording-modal__panel'
                 >
-                    <span
-                        className='recording-modal__icon'
-                        aria-hidden='true'
-                    >
-                        ●
-                    </span>
-                    <span className='recording-modal__duration'>
-                        {formatDuration(this.props.duration)}
-                    </span>
-                    {this.props.isLoading ? (
-                        <span className='recording-modal__status'>
-                            Transcribing...
+                    <div className='recording-modal__header'>
+                        <span
+                            className='recording-modal__icon'
+                            style={isRecording ? {opacity: pulseOpacity} : undefined}
+                            aria-hidden='true'
+                        >
+                            ●
                         </span>
-                    ) : (
-                        <>
-                            <button
-                                type='button'
-                                className='recording-modal__button'
-                                style={style.button}
-                                onClick={this.props.cancel}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type='button'
-                                className='recording-modal__button'
-                                style={style.button}
-                                onClick={this.handleStop}
-                            >
-                                Stop &amp; Transcribe
-                            </button>
-                        </>
+                        <span className='recording-modal__duration'>
+                            {formatDuration(this.props.duration)}
+                        </span>
+                        {isRecording && (
+                            <span className='recording-modal__label'>
+                                Recording
+                            </span>
+                        )}
+                    </div>
+
+                    {isRecording && (
+                        <LevelMeter
+                            level={this.props.level}
+                            accentColor={this.props.theme.errorTextColor || '#d24b4e'}
+                            inactiveColor={changeOpacity(this.props.theme.centerChannelColor, 0.15)}
+                        />
                     )}
+
+                    <div className='recording-modal__actions'>
+                        {this.props.isLoading ? (
+                            <span className='recording-modal__status'>
+                                Transcribing...
+                            </span>
+                        ) : (
+                            <>
+                                <button
+                                    type='button'
+                                    className='recording-modal__button'
+                                    style={style.button}
+                                    onClick={this.props.cancel}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type='button'
+                                    className='recording-modal__button'
+                                    style={style.button}
+                                    onClick={this.handleStop}
+                                >
+                                    Stop &amp; Transcribe
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
         );
