@@ -18,8 +18,40 @@ import {
     UPDATE_RECORDING,
 } from '../action_types';
 import Client from '../client';
+import {getMessageFromState} from '../i18n';
 
 let client: Client | null = null;
+
+const KNOWN_ERRORS: Record<string, {id: string; defaultMessage: string}> = {
+    'No channel selected': {
+        id: 'transcribe.error.no_channel',
+        defaultMessage: 'No channel selected',
+    },
+    'No speech detected in recording': {
+        id: 'transcribe.error.no_speech',
+        defaultMessage: 'No speech detected in recording',
+    },
+    'Failed to start recording': {
+        id: 'transcribe.error.start_recording_failed',
+        defaultMessage: 'Failed to start recording',
+    },
+    'Failed to load plugin configuration': {
+        id: 'transcribe.error.config_load_failed',
+        defaultMessage: 'Failed to load plugin configuration',
+    },
+    'Transcription failed': {
+        id: 'transcribe.error.transcription_failed',
+        defaultMessage: 'Transcription failed',
+    },
+    'Recorder is not initialized': {
+        id: 'transcribe.error.recorder_not_initialized',
+        defaultMessage: 'Recorder is not initialized',
+    },
+    'Recording failed': {
+        id: 'transcribe.error.recording_failed',
+        defaultMessage: 'Recording failed',
+    },
+};
 
 function getClient(): Client {
     if (!client) {
@@ -46,6 +78,15 @@ function resolveRootId(state: GlobalState, rootId: string): string {
     return extendedState.views?.rhs?.selectedPostId || '';
 }
 
+function localizeError(state: GlobalState, message: string): string {
+    const knownError = KNOWN_ERRORS[message];
+    if (knownError) {
+        return getMessageFromState(state, knownError.id, knownError.defaultMessage);
+    }
+
+    return message;
+}
+
 async function showError(dispatch: Dispatch, state: GlobalState, channelId: string, message: string): Promise<void> {
     const resolvedChannelId = resolveChannelId(state, channelId);
     const userId = getCurrentUserId(state);
@@ -53,11 +94,19 @@ async function showError(dispatch: Dispatch, state: GlobalState, channelId: stri
         return;
     }
 
+    const localizedMessage = localizeError(state, message);
+    const errorText = getMessageFromState(
+        state,
+        'transcribe.error.failed',
+        '**Transcription failed:** {message}',
+        {message: localizedMessage},
+    );
+
     try {
         await getClient().createEphemeralError(
             resolvedChannelId,
             userId,
-            `**Transcription failed:** ${message}`,
+            errorText,
         );
     } catch {
         // Ignore secondary failures when reporting errors.
@@ -75,7 +124,12 @@ async function transcribeAndPost(
     const resolvedRootId = resolveRootId(state, rootId);
 
     if (!resolvedChannelId) {
-        await showError(dispatch, state, channelId, 'No channel selected');
+        await showError(
+            dispatch,
+            state,
+            channelId,
+            getMessageFromState(state, 'transcribe.error.no_channel', 'No channel selected'),
+        );
         closeRecordingModal()(dispatch);
         return;
     }
@@ -93,7 +147,11 @@ async function transcribeAndPost(
 
         await getClient().createTextPost(resolvedChannelId, resolvedRootId, text.trim());
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
+        const message = error instanceof Error ? error.message : getMessageFromState(
+            getState(),
+            'transcribe.error.unknown',
+            'Unknown error',
+        );
         await showError(dispatch, getState(), resolvedChannelId, message);
     } finally {
         dispatch({type: SET_LOADING, loading: false});
@@ -142,8 +200,13 @@ export const recordTranscription = (channelId: string, rootId: string) => async 
         );
         dispatch({type: START_RECORDING});
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'Failed to start recording';
-        await showError(dispatch, getState(), channelId, message);
+        const state = getState();
+        const message = error instanceof Error ? error.message : getMessageFromState(
+            state,
+            'transcribe.error.start_recording_failed',
+            'Failed to start recording',
+        );
+        await showError(dispatch, state, channelId, message);
         closeRecordingModal()(dispatch);
     }
 };

@@ -2,6 +2,9 @@
   "compilerOptions": {
     "target": "esnext",
     "baseUrl": "./src",
+    "paths": {
+      "i18n/*": ["../i18n/*"]
+    },
     "lib": [
       "dom",
       "dom.iterable",

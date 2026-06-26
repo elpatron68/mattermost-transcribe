@@ -1,0 +1,16 @@
+{
+    "transcribe.file_upload.label": "Transkribieren",
+    "transcribe.modal.cancel": "Abbrechen",
+    "transcribe.modal.recording": "Aufnahme",
+    "transcribe.modal.stop": "Stopp & Transkribieren",
+    "transcribe.modal.transcribing": "Transkribiere...",
+    "transcribe.error.failed": "**Transkription fehlgeschlagen:** {message}",
+    "transcribe.error.no_channel": "Kein Kanal ausgewählt",
+    "transcribe.error.no_speech": "In der Aufnahme wurde keine Sprache erkannt",
+    "transcribe.error.start_recording_failed": "Aufnahme konnte nicht gestartet werden",
+    "transcribe.error.config_load_failed": "Plugin-Konfiguration konnte nicht geladen werden",
+    "transcribe.error.transcription_failed": "Transkription fehlgeschlagen",
+    "transcribe.error.recorder_not_initialized": "Recorder ist nicht initialisiert",
+    "transcribe.error.recording_failed": "Aufnahme fehlgeschlagen",
+    "transcribe.error.unknown": "Unbekannter Fehler"
+}

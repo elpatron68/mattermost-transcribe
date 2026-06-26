@@ -1,0 +1,6 @@
+{
+    "transcribe.command.autocomplete_desc": "Record audio and post a transcription",
+    "transcribe.command.empty": "Empty command",
+    "transcribe.command.ephemeral_hint": "Use the microphone button in the message input to start recording.",
+    "transcribe.command.unknown": "Unknown command: {{.Command}}"
+}

@@ -36,7 +36,7 @@ func TestTranscribeCommand(t *testing.T) {
 		AutoCompleteHint: "",
 		AutocompleteData: model.NewAutocompleteData("transcribe", "", "Record audio and post a transcription"),
 	}).Return(nil)
-	cmdHandler := NewCommandHandler(env.client)
+	cmdHandler := NewCommandHandler(env.client, nil)
 
 	args := &model.CommandArgs{
 		Command: "/transcribe",

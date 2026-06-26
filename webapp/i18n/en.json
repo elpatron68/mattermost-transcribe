@@ -1,6 +1,16 @@
 {
     "transcribe.file_upload.label": "Transcribe",
     "transcribe.modal.cancel": "Cancel",
+    "transcribe.modal.recording": "Recording",
     "transcribe.modal.stop": "Stop & Transcribe",
-    "transcribe.modal.transcribing": "Transcribing..."
+    "transcribe.modal.transcribing": "Transcribing...",
+    "transcribe.error.failed": "**Transcription failed:** {message}",
+    "transcribe.error.no_channel": "No channel selected",
+    "transcribe.error.no_speech": "No speech detected in recording",
+    "transcribe.error.start_recording_failed": "Failed to start recording",
+    "transcribe.error.config_load_failed": "Failed to load plugin configuration",
+    "transcribe.error.transcription_failed": "Transcription failed",
+    "transcribe.error.recorder_not_initialized": "Recorder is not initialized",
+    "transcribe.error.recording_failed": "Recording failed",
+    "transcribe.error.unknown": "Unknown error"
 }

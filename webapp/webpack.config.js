@@ -36,6 +36,7 @@ const config = {
     resolve: {
         modules: [
             'src',
+            path.resolve(__dirname),
             'node_modules',
         ],
         extensions: ['*', '.js', '.jsx', '.ts', '.tsx'],
@@ -81,6 +82,7 @@ const config = {
         'prop-types': 'PropTypes',
         'react-bootstrap': 'ReactBootstrap',
         'react-router-dom': 'ReactRouterDom',
+        'react-intl': 'ReactIntl',
     },
     output: {
         devtoolNamespace: PLUGIN_ID,

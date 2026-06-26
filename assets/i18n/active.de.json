@@ -1,0 +1,6 @@
+{
+    "transcribe.command.autocomplete_desc": "Audio aufnehmen und Transkription posten",
+    "transcribe.command.empty": "Leerer Befehl",
+    "transcribe.command.ephemeral_hint": "Verwenden Sie die Mikrofon-Schaltfläche in der Nachrichteneingabe, um die Aufnahme zu starten.",
+    "transcribe.command.unknown": "Unbekannter Befehl: {{.Command}}"
+}

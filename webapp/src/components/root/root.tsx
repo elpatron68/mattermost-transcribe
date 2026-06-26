@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import {FormattedMessage} from 'react-intl';
 import {changeOpacity} from 'mattermost-redux/utils/theme_utils';
 
 import LevelMeter from './level_meter';
@@ -72,7 +73,10 @@ export default class Root extends React.PureComponent<Props> {
                         </span>
                         {isRecording && (
                             <span className='recording-modal__label'>
-                                Recording
+                                <FormattedMessage
+                                    id='transcribe.modal.recording'
+                                    defaultMessage='Recording'
+                                />
                             </span>
                         )}
                     </div>
@@ -88,7 +92,10 @@ export default class Root extends React.PureComponent<Props> {
                     <div className='recording-modal__actions'>
                         {this.props.isLoading ? (
                             <span className='recording-modal__status'>
-                                Transcribing...
+                                <FormattedMessage
+                                    id='transcribe.modal.transcribing'
+                                    defaultMessage='Transcribing...'
+                                />
                             </span>
                         ) : (
                             <>
@@ -98,7 +105,10 @@ export default class Root extends React.PureComponent<Props> {
                                     style={style.button}
                                     onClick={this.props.cancel}
                                 >
-                                    Cancel
+                                    <FormattedMessage
+                                        id='transcribe.modal.cancel'
+                                        defaultMessage='Cancel'
+                                    />
                                 </button>
                                 <button
                                     type='button'
@@ -106,7 +116,10 @@ export default class Root extends React.PureComponent<Props> {
                                     style={style.button}
                                     onClick={this.handleStop}
                                 >
-                                    Stop &amp; Transcribe
+                                    <FormattedMessage
+                                        id='transcribe.modal.stop'
+                                        defaultMessage='Stop & Transcribe'
+                                    />
                                 </button>
                             </>
                         )}

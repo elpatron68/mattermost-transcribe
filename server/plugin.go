@@ -2,12 +2,14 @@ package main
 
 import (
 	"net/http"
+	"path/filepath"
 	"sync"
 
 	"github.com/gorilla/mux"
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin"
 	"github.com/mattermost/mattermost/server/public/pluginapi"
+	"github.com/mattermost/mattermost/server/public/pluginapi/i18n"
 
 	"github.com/medisoftware/mattermost-transcribe/server/command"
 )
@@ -19,6 +21,8 @@ type Plugin struct {
 
 	commandClient command.Command
 
+	i18nBundle *i18n.Bundle
+
 	router *mux.Router
 
 	configurationLock sync.RWMutex
@@ -28,7 +32,14 @@ type Plugin struct {
 
 func (p *Plugin) OnActivate() error {
 	p.client = pluginapi.NewClient(p.API, p.Driver)
-	p.commandClient = command.NewCommandHandler(p.client)
+
+	i18nBundle, err := i18n.InitBundle(p.API, filepath.Join("assets", "i18n"))
+	if err != nil {
+		return err
+	}
+	p.i18nBundle = i18nBundle
+
+	p.commandClient = command.NewCommandHandler(p.client, p.i18nBundle)
 	p.router = p.initRouter()
 
 	return nil
