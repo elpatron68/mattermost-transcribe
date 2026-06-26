@@ -1,16 +1,19 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
+	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 )
 
 type configuration struct {
-	ParakeetURL            string
-	ParakeetAPIKey         string
-	DefaultLanguage        string
-	MaxRecordingDuration   int64
+	ParakeetURL          string
+	ParakeetAPIKey       string
+	DefaultLanguage      string
+	MaxRecordingDuration int64
 }
 
 func (c *configuration) Clone() *configuration {
@@ -47,12 +50,116 @@ func (p *Plugin) setConfiguration(configuration *configuration) {
 	p.configuration = configuration
 }
 
+func (p *Plugin) getRawPluginSettings() map[string]any {
+	cfg := p.API.GetConfig()
+	if cfg == nil || cfg.PluginSettings.Plugins == nil {
+		return nil
+	}
+
+	pluginID := pluginConfigID()
+	if pluginID == "" {
+		return nil
+	}
+
+	return cfg.PluginSettings.Plugins[pluginID]
+}
+
+func pluginConfigID() string {
+	if manifest != nil && manifest.Id != "" {
+		return manifest.Id
+	}
+
+	return "com.medisoft.mattermost-transcribe"
+}
+
+func mergeConfigurationFromRaw(configuration *configuration, raw map[string]any) {
+	if configuration == nil || len(raw) == 0 {
+		return
+	}
+
+	configuration.ParakeetURL = firstNonEmpty(
+		stringSetting(raw, "parakeeturl"),
+		stringSetting(raw, "ParakeetURL"),
+		configuration.ParakeetURL,
+	)
+	configuration.ParakeetAPIKey = firstNonEmpty(
+		stringSetting(raw, "parakeetapikey"),
+		stringSetting(raw, "ParakeetAPIKey"),
+		configuration.ParakeetAPIKey,
+	)
+	configuration.DefaultLanguage = firstNonEmpty(
+		stringSetting(raw, "defaultlanguage"),
+		stringSetting(raw, "DefaultLanguage"),
+		configuration.DefaultLanguage,
+	)
+
+	if duration := int64Setting(raw, "maxrecordingduration", "MaxRecordingDuration"); duration > 0 {
+		configuration.MaxRecordingDuration = duration
+	}
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		if trimmed := strings.TrimSpace(value); trimmed != "" {
+			return trimmed
+		}
+	}
+
+	return ""
+}
+
+func stringSetting(raw map[string]any, key string) string {
+	value, ok := raw[key]
+	if !ok || value == nil {
+		return ""
+	}
+
+	switch typed := value.(type) {
+	case string:
+		return strings.TrimSpace(typed)
+	case float64:
+		return strings.TrimSpace(strconv.FormatInt(int64(typed), 10))
+	case int:
+		return strconv.Itoa(typed)
+	case int64:
+		return strconv.FormatInt(typed, 10)
+	default:
+		return strings.TrimSpace(fmt.Sprint(typed))
+	}
+}
+
+func int64Setting(raw map[string]any, keys ...string) int64 {
+	for _, key := range keys {
+		value, ok := raw[key]
+		if !ok || value == nil {
+			continue
+		}
+
+		switch typed := value.(type) {
+		case float64:
+			return int64(typed)
+		case int:
+			return int64(typed)
+		case int64:
+			return typed
+		case string:
+			if parsed, err := strconv.ParseInt(strings.TrimSpace(typed), 10, 64); err == nil {
+				return parsed
+			}
+		}
+	}
+
+	return 0
+}
+
 func (p *Plugin) OnConfigurationChange() error {
 	configuration := new(configuration)
 
 	if err := p.API.LoadPluginConfiguration(configuration); err != nil {
 		return errors.Wrap(err, "failed to load plugin configuration")
 	}
+
+	mergeConfigurationFromRaw(configuration, p.getRawPluginSettings())
 
 	if configuration.DefaultLanguage == "" {
 		configuration.DefaultLanguage = "de"
