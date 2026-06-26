@@ -1,4 +1,4 @@
-module github.com/medisoft/mattermost-transcribe
+module github.com/medisoftware/mattermost-transcribe
 
 go 1.25
 

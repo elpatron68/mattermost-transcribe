@@ -61,4 +61,4 @@ formatters:
           replacement: any
     goimports:
       local-prefixes:
-        - github.com/medisoft/mattermost-transcribe
+        - github.com/medisoftware/mattermost-transcribe

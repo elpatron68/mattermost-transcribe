@@ -69,7 +69,7 @@ func pluginConfigID() string {
 		return manifest.Id
 	}
 
-	return "com.medisoft.mattermost-transcribe"
+	return "de.medisoftware.mattermost-transcribe"
 }
 
 func mergeConfigurationFromRaw(configuration *configuration, raw map[string]any) {

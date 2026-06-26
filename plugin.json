@@ -1,9 +1,9 @@
 {
-    "id": "com.medisoft.mattermost-transcribe",
+    "id": "de.medisoftware.mattermost-transcribe",
     "name": "Transcribe",
     "description": "Record voice messages and post transcriptions powered by Parakeet ASR.",
-    "homepage_url": "https://github.com/medisoft/mattermost-transcribe",
-    "support_url": "https://github.com/medisoft/mattermost-transcribe/issues",
+    "homepage_url": "https://github.com/medisoftware/mattermost-transcribe",
+    "support_url": "https://github.com/medisoftware/mattermost-transcribe/issues",
     "icon_path": "assets/starter-template-icon.svg",
     "min_server_version": "6.2.1",
     "server": {

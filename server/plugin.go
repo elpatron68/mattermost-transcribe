@@ -9,7 +9,7 @@ import (
 	"github.com/mattermost/mattermost/server/public/plugin"
 	"github.com/mattermost/mattermost/server/public/pluginapi"
 
-	"github.com/medisoft/mattermost-transcribe/server/command"
+	"github.com/medisoftware/mattermost-transcribe/server/command"
 )
 
 type Plugin struct {

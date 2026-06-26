@@ -58,7 +58,7 @@ Recommended on Linux or WSL:
 make dist
 ```
 
-The bundle is written to `dist/com.medisoft.mattermost-transcribe.tar.gz`.
+The bundle is written to `dist/de.medisoftware.mattermost-transcribe.tar.gz`.
 
 `make dist` uses `build/package_bundle.py` to set the executable bit on Linux plugin binaries in the archive. That avoids `permission denied` errors when Mattermost installs a bundle built on Windows.
 
