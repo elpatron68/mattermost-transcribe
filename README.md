@@ -23,7 +23,13 @@ Record voice in Mattermost, transcribe it with [Parakeet](https://github.com/ach
 
 ## Parakeet Setup
 
-Run Parakeet as a separate service. The official Docker image includes ONNX Runtime, models, and ffmpeg:
+Run Parakeet as a separate service. The official Docker image includes ONNX Runtime, models, and ffmpeg.
+
+### Recommended Docker Compose
+
+The image defaults to **`-workers 4`**, which pre-allocates several ONNX decoder sessions and can consume multiple gigabytes of RAM. For production we run **one worker** and cap container memory so a growing process cannot take down the host.
+
+Example for a **16 GiB** LXC/VM (~30 Mattermost users, moderate voice-message usage):
 
 ```yaml
 services:
@@ -33,16 +39,61 @@ services:
       - "5092:5092"
     environment:
       - PARAKEET_API_KEY=your-secret-key
+    command:
+      - "-models"
+      - "/models"
+      - "-workers"
+      - "1"
+      - "-log-level"
+      - "info"
+    mem_limit: 8g
+    cpus: 8
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5092/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
 ```
+
+| Setting | Suggested value | Notes |
+|---------|-----------------|-------|
+| `-workers` | `1` | One transcription at a time; extra requests queue at Parakeet |
+| `mem_limit` | `8g` on a 16 GiB host | Leaves headroom for the OS; container restarts on OOM |
+| `cpus` | `8` on a 16-core host | Enough for a single ONNX job; host stays responsive |
+| `healthcheck` | `/health` | Image includes `curl`; status shows as `healthy` in `docker ps` |
+
+Scale `mem_limit` and `cpus` with your host (e.g. `mem_limit: 4g` / `cpus: 4` on an 8 GiB VM). Use `-workers 2` only if users often transcribe in parallel and you accept higher RAM use.
 
 Verify the service:
 
 ```bash
 curl http://localhost:5092/health
+docker ps   # STATUS should include (healthy)
 ```
 
 If Mattermost and Parakeet run in Docker on the same network, use the container hostname (e.g. `http://parakeet:5092`) instead of `localhost`.
+
+### Operations notes (MediSoftware experience)
+
+These notes come from running Parakeet behind this plugin in production-like tests.
+
+**Memory does not fully return after transcription.** After a container restart, idle usage can be very low (on the order of tens of MiB). Each transcription loads ONNX encoder/decoder work and ffmpeg (WebM from the browser). When the job finishes, CPU drops, but **RSS often stays elevated** — Go and ONNX Runtime frequently keep memory in the process instead of returning it to the OS. Proxmox/LXC graphs can show stepwise RAM growth per transcription even with `-workers 1`. This is retention/allocator behaviour, not necessarily a leak in the plugin.
+
+**More RAM alone does not fix it.** We observed the same pattern on 4 GiB, 8 GiB, and 16 GiB VMs: the ceiling moves, but memory still accumulates across requests unless the process is restarted.
+
+**Multi-user behaviour (~30 users).** With `-workers 1`, Parakeet handles one job at a time; others wait in its HTTP queue. The plugin waits up to **60 seconds** per request (`server/transcribe.go`). Sporadic use (one or two people at a time) is fine; several simultaneous long recordings can cause waits or timeouts. The plugin does not queue on the Mattermost side.
+
+**Mitigations that helped:**
+
+- Always set `-workers` explicitly (do not rely on the default `4`).
+- Set `mem_limit` so runaway RSS restarts the container instead of freezing the VM.
+- Add **swap** on the Parakeet host if none is configured (e.g. 2–4 GiB).
+- Optional **scheduled restart** (e.g. nightly `docker restart`) as a workaround until upstream improves memory release.
+- Monitor with `docker stats` and `free -h`; alert on sustained high container memory or failed `/health`.
+
+**nginx / upload size (Mattermost plugin bundle, not Parakeet):** ensure `client_max_body_size` is **≥ 100M** in every nginx `location` that handles plugin uploads — a global 50M limit caused HTTP 413 for our ~63 MB bundle even when other blocks allowed 100M.
 
 ## Installation
 
@@ -140,6 +191,8 @@ GitHub Actions workflow [`.github/workflows/build.yml`](.github/workflows/build.
 - No streaming transcription
 - Parakeet must be reachable from the Mattermost server
 - Maximum audio upload to Parakeet is 25 MB
+- Parakeet processes one job per worker; concurrent users may wait or hit the 60 s plugin timeout (see [Operations notes](#operations-notes-medisoftware-experience))
+- Parakeet may retain high memory after transcriptions; plan restarts or `mem_limit` (see Parakeet setup above)
 
 ## License
 
