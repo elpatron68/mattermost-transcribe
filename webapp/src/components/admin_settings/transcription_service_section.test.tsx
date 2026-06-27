@@ -4,7 +4,9 @@
 import {
     BACKEND_OPENAI,
     BACKEND_PARAKEET,
+    adminSettingKeyFor,
     backendFromSettings,
+    pluginAdminSettingKey,
     settingsForBackendSwitch,
 } from './transcription_service_settings';
 
@@ -31,5 +33,15 @@ describe('transcription_service_settings', () => {
             ParakeetURL: 'http://parakeet:5092',
             TranscriptionModel: '',
         });
+    });
+
+    it('builds Mattermost admin console setting keys', () => {
+        expect(pluginAdminSettingKey('TranscriptionBackend')).toBe(
+            'PluginSettings.Plugins.de+medisoftware+mattermost-transcribe.transcriptionbackend',
+        );
+        expect(adminSettingKeyFor(
+            'PluginSettings.Plugins.de+medisoftware+mattermost-transcribe.transcriptionservice',
+            'TranscriptionBackend',
+        )).toBe('PluginSettings.Plugins.de+medisoftware+mattermost-transcribe.transcriptionbackend');
     });
 });

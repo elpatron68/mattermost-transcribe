@@ -13,6 +13,7 @@ import {
     DEFAULT_OPENAI_MODEL,
     DEFAULT_OPENAI_URL,
     DEFAULT_PARAKEET_URL,
+    adminSettingKeyFor,
     backendFromSettings,
     defaultsForBackend,
     stringSetting,
@@ -22,6 +23,7 @@ import {
 import './transcription_service_section.css';
 
 type Props = {
+    id?: string;
     config?: Partial<AdminConfig>;
     disabled?: boolean;
     onChange?: (key: string, value: string) => void;
@@ -68,22 +70,30 @@ export default function TranscriptionServiceSection(props: Props) {
 
     const notifyChange = useCallback((key: string, value: string) => {
         const handler = props.onChange ?? props.onSettingChange ?? props.informChange;
-        handler?.(key, value);
+        handler?.(adminSettingKeyFor(props.id, key), value);
         props.setSaveNeeded?.();
     }, [props]);
 
+    const syncFormToAdminState = useCallback((formState: FormState) => {
+        notifyChange('TranscriptionBackend', formState.backend);
+        notifyChange('ParakeetURL', formState.url);
+        notifyChange('ParakeetAPIKey', formState.apiKey);
+        notifyChange('TranscriptionModel', formState.model);
+    }, [notifyChange]);
+
     const setBackend = useCallback((nextBackend: string) => {
         const nextSettings = settingsForBackendSwitch(nextBackend);
-        setForm((current) => ({
-            ...current,
-            backend: nextBackend,
-            url: nextSettings.ParakeetURL,
-            model: nextSettings.TranscriptionModel,
-        }));
-        notifyChange('TranscriptionBackend', nextSettings.TranscriptionBackend);
-        notifyChange('ParakeetURL', nextSettings.ParakeetURL);
-        notifyChange('TranscriptionModel', nextSettings.TranscriptionModel);
-    }, [notifyChange]);
+        setForm((current) => {
+            const next = {
+                ...current,
+                backend: nextBackend,
+                url: nextSettings.ParakeetURL,
+                model: nextSettings.TranscriptionModel,
+            };
+            syncFormToAdminState(next);
+            return next;
+        });
+    }, [syncFormToAdminState]);
 
     const isParakeet = form.backend === BACKEND_PARAKEET;
     const disabled = Boolean(props.disabled);
@@ -136,8 +146,11 @@ export default function TranscriptionServiceSection(props: Props) {
                             placeholder={DEFAULT_PARAKEET_URL}
                             onChange={(e) => {
                                 const value = e.target.value;
-                                setForm((current) => ({...current, url: value}));
-                                notifyChange('ParakeetURL', value);
+                                setForm((current) => {
+                                    const next = {...current, url: value};
+                                    syncFormToAdminState(next);
+                                    return next;
+                                });
                             }}
                         />
                         <span className='transcribe-admin-section__help'>Base URL reachable from the Mattermost server, e.g. http://parakeet:5092</span>
@@ -152,8 +165,11 @@ export default function TranscriptionServiceSection(props: Props) {
                             autoComplete='off'
                             onChange={(e) => {
                                 const value = e.target.value;
-                                setForm((current) => ({...current, apiKey: value}));
-                                notifyChange('ParakeetAPIKey', value);
+                                setForm((current) => {
+                                    const next = {...current, apiKey: value};
+                                    syncFormToAdminState(next);
+                                    return next;
+                                });
                             }}
                         />
                         <span className='transcribe-admin-section__help'>Must match PARAKEET_API_KEY on the Parakeet server, if set</span>
@@ -171,8 +187,11 @@ export default function TranscriptionServiceSection(props: Props) {
                             autoComplete='off'
                             onChange={(e) => {
                                 const value = e.target.value;
-                                setForm((current) => ({...current, apiKey: value}));
-                                notifyChange('ParakeetAPIKey', value);
+                                setForm((current) => {
+                                    const next = {...current, apiKey: value};
+                                    syncFormToAdminState(next);
+                                    return next;
+                                });
                             }}
                         />
                         <span className='transcribe-admin-section__help'>Bearer token for https://api.openai.com</span>
@@ -187,8 +206,11 @@ export default function TranscriptionServiceSection(props: Props) {
                             placeholder={DEFAULT_OPENAI_MODEL}
                             onChange={(e) => {
                                 const value = e.target.value;
-                                setForm((current) => ({...current, model: value}));
-                                notifyChange('TranscriptionModel', value);
+                                setForm((current) => {
+                                    const next = {...current, model: value};
+                                    syncFormToAdminState(next);
+                                    return next;
+                                });
                             }}
                         />
                         <span className='transcribe-admin-section__help'>OpenAI Whisper model (default: whisper-1)</span>
