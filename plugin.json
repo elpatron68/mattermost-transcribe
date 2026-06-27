@@ -1,71 +1,71 @@
 {
-    "id": "de.medisoftware.mattermost-transcribe",
-    "name": "Transcribe",
-    "version": "0.1.0",
-    "description": "Record voice in Mattermost, transcribe with on-premises Parakeet ASR, review the text, and post it as a channel message.",
-    "homepage_url": "https://github.com/medisoftware/mattermost-transcribe#readme",
-    "support_url": "https://github.com/medisoftware/mattermost-transcribe/issues",
-    "release_notes_url": "https://github.com/medisoftware/mattermost-transcribe/releases",
-    "icon_path": "assets/icon.svg",
-    "min_server_version": "6.2.1",
-    "server": {
-        "executables": {
-            "linux-amd64": "server/dist/plugin-linux-amd64",
-            "linux-arm64": "server/dist/plugin-linux-arm64"
-        }
-    },
-    "webapp": {
-        "bundle_path": "webapp/dist/main.js"
-    },
-    "settings_schema": {
-        "header": "Configure the speech-to-text backend for voice messages.",
-        "footer": "Parakeet runs separately (e.g. via Docker). OpenAI sends audio to the cloud. See the plugin README for setup instructions.",
-        "settings": [
-            {
-                "key": "TranscriptionService",
-                "display_name": "Transcription Service",
-                "type": "custom",
-                "help_text": "Choose the backend and connection settings."
-            },
-            {
-                "key": "TranscriptionBackend",
-                "display_name": "Backend",
-                "type": "custom",
-                "default": "parakeet"
-            },
-            {
-                "key": "ParakeetURL",
-                "display_name": "Server URL",
-                "type": "custom",
-                "default": "http://localhost:5092",
-                "placeholder": "http://parakeet:5092"
-            },
-            {
-                "key": "ParakeetAPIKey",
-                "display_name": "API Key",
-                "type": "custom",
-                "default": ""
-            },
-            {
-                "key": "TranscriptionModel",
-                "display_name": "Model",
-                "type": "custom",
-                "default": ""
-            },
-            {
-                "key": "DefaultLanguage",
-                "display_name": "Default Language",
-                "type": "text",
-                "help_text": "ISO-639-1 language code sent to the ASR service (e.g. de, en).",
-                "default": "de"
-            },
-            {
-                "key": "MaxRecordingDuration",
-                "display_name": "Max Recording Duration (seconds)",
-                "type": "number",
-                "help_text": "Maximum length of a voice recording before it is stopped automatically.",
-                "default": 120
-            }
-        ]
+  "id": "de.medisoftware.mattermost-transcribe",
+  "name": "Transcribe",
+  "version": "0.2.0",
+  "description": "Record voice in Mattermost, transcribe with on-premises Parakeet ASR, review the text, and post it as a channel message.",
+  "homepage_url": "https://github.com/medisoftware/mattermost-transcribe#readme",
+  "support_url": "https://github.com/medisoftware/mattermost-transcribe/issues",
+  "release_notes_url": "https://github.com/elpatron68/mattermost-transcribe/releases/tag/v0.2.0",
+  "icon_path": "assets/icon.svg",
+  "min_server_version": "6.2.1",
+  "server": {
+    "executables": {
+      "linux-amd64": "server/dist/plugin-linux-amd64",
+      "linux-arm64": "server/dist/plugin-linux-arm64"
     }
+  },
+  "webapp": {
+    "bundle_path": "webapp/dist/main.js"
+  },
+  "settings_schema": {
+    "header": "Configure the speech-to-text backend for voice messages.",
+    "footer": "Parakeet runs separately (e.g. via Docker). OpenAI sends audio to the cloud. See the plugin README for setup instructions.",
+    "settings": [
+      {
+        "key": "TranscriptionService",
+        "display_name": "Transcription Service",
+        "type": "custom",
+        "help_text": "Choose the backend and connection settings."
+      },
+      {
+        "key": "TranscriptionBackend",
+        "display_name": "Backend",
+        "type": "custom",
+        "default": "parakeet"
+      },
+      {
+        "key": "ParakeetURL",
+        "display_name": "Server URL",
+        "type": "custom",
+        "default": "http://localhost:5092",
+        "placeholder": "http://parakeet:5092"
+      },
+      {
+        "key": "ParakeetAPIKey",
+        "display_name": "API Key",
+        "type": "custom",
+        "default": ""
+      },
+      {
+        "key": "TranscriptionModel",
+        "display_name": "Model",
+        "type": "custom",
+        "default": ""
+      },
+      {
+        "key": "DefaultLanguage",
+        "display_name": "Default Language",
+        "type": "text",
+        "help_text": "ISO-639-1 language code sent to the ASR service (e.g. de, en).",
+        "default": "de"
+      },
+      {
+        "key": "MaxRecordingDuration",
+        "display_name": "Max Recording Duration (seconds)",
+        "type": "number",
+        "help_text": "Maximum length of a voice recording before it is stopped automatically.",
+        "default": 120
+      }
+    ]
+  }
 }
