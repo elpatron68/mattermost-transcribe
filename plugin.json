@@ -1,11 +1,11 @@
 {
   "id": "de.medisoftware.mattermost-transcribe",
   "name": "Transcribe",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Record voice in Mattermost, transcribe with on-premises Parakeet ASR, review the text, and post it as a channel message.",
   "homepage_url": "https://github.com/medisoftware/mattermost-transcribe#readme",
   "support_url": "https://github.com/medisoftware/mattermost-transcribe/issues",
-  "release_notes_url": "https://github.com/elpatron68/mattermost-transcribe/releases/tag/v0.2.2",
+  "release_notes_url": "https://github.com/elpatron68/mattermost-transcribe/releases/tag/v0.2.3",
   "icon_path": "assets/icon.svg",
   "min_server_version": "6.2.1",
   "server": {
