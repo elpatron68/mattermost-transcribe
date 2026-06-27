@@ -16,32 +16,27 @@ updates:
       interval: weekly
     commit-message:
       prefix: deps
-    ignore:
-      # webpack-cli v6+ breaks the current webpack 5 toolchain (see PR #3)
-      - dependency-name: webpack-cli
-        update-types: [version-update:semver-major]
     groups:
       # parser and plugin must upgrade together (see closed PR #8)
       typescript-eslint:
         patterns:
           - "@typescript-eslint/*"
+      # client, types, and redux share peer dependencies (see closed PR #15)
+      mattermost:
+        patterns:
+          - "@mattermost/*"
+          - "mattermost-redux"
+      # @babel/cli v8 requires @babel/core v8 (see closed PR #13)
+      babel:
+        patterns:
+          - "@babel/*"
+    ignore:
+      # webpack-cli v6+ breaks the current webpack 5 toolchain (see PR #3)
+      - dependency-name: webpack-cli
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
-    schedule:
-      interval: weekly
-    commit-message:
-      prefix: deps
-
-  - package-ecosystem: docker
-    directory: /mattermost-server-dev
-    schedule:
-      interval: weekly
-    commit-message:
-      prefix: deps
-
-  - package-ecosystem: docker
-    directory: /docs/parakeet-qa
     schedule:
       interval: weekly
     commit-message:
