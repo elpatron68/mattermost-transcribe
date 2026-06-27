@@ -37,6 +37,9 @@ updates:
       # Babel 8 blocked by @emotion/babel-preset-css-prop (^7 only; see closed PR #18)
       - dependency-name: "@babel/*"
         update-types: [version-update:semver-major]
+      # TS 4→6 needs a coordinated migration; npm --package-lock-only hangs on major bumps
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
