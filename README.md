@@ -1,9 +1,16 @@
 # Mattermost Transcribe Plugin
 
+[![Build](https://github.com/elpatron68/mattermost-transcribe/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/elpatron68/mattermost-transcribe/actions/workflows/build.yml)
+[![License: MIT](https://img.shields.io/github/license/elpatron68/mattermost-transcribe)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/elpatron68/mattermost-transcribe?include_prereleases)](https://github.com/elpatron68/mattermost-transcribe/releases)
+[![Go](https://img.shields.io/github/go-mod/go-version/elpatron68/mattermost-transcribe)](go.mod)
+[![Node.js](https://img.shields.io/badge/node-24.x-339933?logo=node.js&logoColor=white)](.nvmrc)
+[![Mattermost](https://img.shields.io/badge/Mattermost-6.2.1%2B-0058CC?logo=mattermost&logoColor=white)](https://mattermost.com)
+[![Parakeet ASR](https://img.shields.io/badge/ASR-Parakeet-0ea5e9)](https://github.com/achetronic/parakeet)
+
 Record voice in Mattermost, transcribe it with on-premises [Parakeet](https://github.com/achetronic/parakeet) ASR, review the text, and send it as a channel message.
 
-**Plugin ID:** `de.medisoftware.mattermost-transcribe`  
-**Current version:** 0.1.0
+**Plugin ID:** `de.medisoftware.mattermost-transcribe`
 
 ## Features
 
