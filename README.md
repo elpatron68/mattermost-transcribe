@@ -149,7 +149,7 @@ CPU and network spikes align with active transcription only — no sustained hig
 
 Continue to watch RAM over days of regular use; a slow climb would indicate retention accumulating again and may warrant a scheduled container restart.
 
-**nginx / upload size (Mattermost plugin bundle, not Parakeet):** ensure `client_max_body_size` is **≥ 100M** in every nginx `location` that handles plugin uploads — a global 50M limit caused HTTP 413 for our ~63 MB bundle even when other blocks allowed 100M.
+**nginx / upload size (Mattermost plugin bundle, not Parakeet):** ensure `client_max_body_size` is **≥ 100M** in every nginx `location` that handles plugin uploads — a global 50M limit can cause HTTP 413 even when other blocks allow 100M.
 
 ## Installation
 
@@ -157,7 +157,7 @@ Continue to watch RAM over days of regular use; a slow climb would indicate rete
 2. Upload via **System Console → Plugins → Plugin Management**.
 3. Enable the plugin and configure a transcription backend (see [Plugin Configuration](#plugin-configuration)).
 
-The bundle is about 50–60 MB (Linux and macOS server binaries). Ensure upload limits allow it:
+The bundle is about 15–20 MB (Linux `amd64` + `arm64` server binaries, symbols stripped). Ensure upload limits allow it:
 
 - Mattermost `FileSettings.MaxFileSize` (default often 100 MB)
 - Reverse proxy `client_max_body_size` (e.g. nginx) must be **≥ 100M** in every `location` block that handles `/api/v4/plugins`
@@ -240,6 +240,8 @@ make dist
 ```
 
 Output: `dist/de.medisoftware.mattermost-transcribe-<version>.tar.gz` (version from `plugin.json`).
+
+Release bundles include **Linux `amd64` and `arm64` only** — matching supported Mattermost server platforms. `make server-darwin` builds optional macOS binaries for local development but does not add them to `make dist`.
 
 `make dist` uses `build/package_bundle.py` to set executable bits on Linux plugin binaries in the archive (avoids `permission denied` on install).
 
