@@ -26,13 +26,16 @@ updates:
         patterns:
           - "@mattermost/*"
           - "mattermost-redux"
-      # @babel/cli v8 requires @babel/core v8 (see closed PR #13)
+      # keep @babel/* on the same minor line (patch/minor only; see closed PR #18)
       babel:
         patterns:
           - "@babel/*"
     ignore:
       # webpack-cli v6+ breaks the current webpack 5 toolchain (see PR #3)
       - dependency-name: webpack-cli
+        update-types: [version-update:semver-major]
+      # Babel 8 blocked by @emotion/babel-preset-css-prop (^7 only; see closed PR #18)
+      - dependency-name: "@babel/*"
         update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
