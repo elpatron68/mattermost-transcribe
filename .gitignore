@@ -18,6 +18,7 @@ coverage.out
 .env
 .env.*
 !.env.example
+.secrets
 
 # Cursor / IDE
 .cursor/

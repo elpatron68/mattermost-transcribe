@@ -1,0 +1,71 @@
+.transcribe-admin-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.transcribe-admin-section__backend {
+    border: 1px solid rgba(var(--center-channel-color-rgb), 0.16);
+    border-radius: 4px;
+    margin: 0;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.transcribe-admin-section__legend {
+    font-weight: 600;
+    padding: 0 4px;
+}
+
+.transcribe-admin-section__option {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 10px;
+    row-gap: 2px;
+    align-items: start;
+    padding: 10px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.transcribe-admin-section__option--active {
+    background: rgba(var(--button-bg-rgb), 0.08);
+}
+
+.transcribe-admin-section__option input {
+    margin-top: 3px;
+}
+
+.transcribe-admin-section__option-title {
+    font-weight: 600;
+}
+
+.transcribe-admin-section__option-help {
+    grid-column: 2;
+    color: rgba(var(--center-channel-color-rgb), 0.72);
+    font-size: 12px;
+}
+
+.transcribe-admin-section__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.transcribe-admin-section__label {
+    font-weight: 600;
+}
+
+.transcribe-admin-section__help {
+    color: rgba(var(--center-channel-color-rgb), 0.72);
+    font-size: 12px;
+}
+
+.transcribe-admin-section__note {
+    margin: 0;
+    color: rgba(var(--center-channel-color-rgb), 0.72);
+    font-size: 12px;
+}

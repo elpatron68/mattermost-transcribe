@@ -17,7 +17,7 @@ For full plugin testing you also need Mattermost with the Transcribe plugin enab
 The plugin calls:
 
 - `GET /health` (optional sanity check)
-- `POST /v1/audio/transcriptions` — multipart `file`, `language`, `response_format=json`
+- `POST /v1/audio/transcriptions` — multipart `file`, `language`, optional `model`, `response_format=json`
 - Optional header `Authorization: Bearer <PARAKEET_API_KEY>`
 
 Audio from Mattermost is **WebM** from the browser; Parakeet transcodes via ffmpeg.
@@ -51,9 +51,9 @@ curl -X POST http://localhost:5092/v1/audio/transcriptions \
 ### A) Mattermost on the host, Parakeet in Docker (simplest)
 
 1. Start Parakeet (`docs/parakeet-qa`, port **5092**).
-2. In **System Console → Plugins → Transcribe** set:
-   - **Parakeet Server URL:** `http://localhost:5092`
-   - **Parakeet API Key:** `qa-test-key` (or your `PARAKEET_API_KEY` from `.env`)
+2. In **System Console → Plugins → Transcribe** choose **Parakeet** and set:
+   - **Server URL:** `http://localhost:5092`
+   - **API Key:** `qa-test-key` (or your `PARAKEET_API_KEY` from `.env`)
    - **Default Language:** `en` or `de`
 
 ### B) Mattermost and Parakeet both in Docker

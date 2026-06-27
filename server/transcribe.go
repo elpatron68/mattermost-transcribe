@@ -29,8 +29,9 @@ type parakeetResponse struct {
 
 func (p *Plugin) transcribeAudio(audio []byte, filename string) (string, error) {
 	cfg := p.getConfiguration()
-	if strings.TrimSpace(cfg.ParakeetURL) == "" {
-		return "", errors.New("Parakeet URL is not configured")
+	baseURL := strings.TrimRight(cfg.effectiveTranscriptionURL(), "/")
+	if baseURL == "" {
+		return "", errors.New("transcription service URL is not configured")
 	}
 
 	language := cfg.DefaultLanguage
@@ -38,7 +39,6 @@ func (p *Plugin) transcribeAudio(audio []byte, filename string) (string, error) 
 		language = "de"
 	}
 
-	baseURL := strings.TrimRight(cfg.ParakeetURL, "/")
 	endpoint := baseURL + "/v1/audio/transcriptions"
 
 	body := &bytes.Buffer{}
@@ -55,6 +55,12 @@ func (p *Plugin) transcribeAudio(audio []byte, filename string) (string, error) 
 
 	if err := writer.WriteField("language", language); err != nil {
 		return "", errors.Wrap(err, "failed to write language field")
+	}
+
+	if model := cfg.effectiveTranscriptionModel(); model != "" {
+		if err := writer.WriteField("model", model); err != nil {
+			return "", errors.Wrap(err, "failed to write model field")
+		}
 	}
 
 	if err := writer.WriteField("response_format", "json"); err != nil {
@@ -81,22 +87,22 @@ func (p *Plugin) transcribeAudio(audio []byte, filename string) (string, error) 
 	client := &http.Client{Timeout: transcribeTimeout}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to call Parakeet")
+		return "", errors.Wrap(err, "failed to call transcription service")
 	}
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to read Parakeet response")
+		return "", errors.Wrap(err, "failed to read transcription service response")
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("Parakeet returned status %d: %s", resp.StatusCode, strings.TrimSpace(string(respBody)))
+		return "", fmt.Errorf("transcription service returned status %d: %s", resp.StatusCode, strings.TrimSpace(string(respBody)))
 	}
 
 	var result parakeetResponse
 	if err := json.Unmarshal(respBody, &result); err != nil {
-		return "", errors.Wrap(err, "failed to parse Parakeet response")
+		return "", errors.Wrap(err, "failed to parse transcription service response")
 	}
 
 	return strings.TrimSpace(result.Text), nil

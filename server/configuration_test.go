@@ -19,6 +19,10 @@ func TestMergeConfigurationFromRawPrefersLowercaseParakeetURL(t *testing.T) {
 		"parakeeturl":          "http://10.10.2.85:5092",
 		"ParakeetAPIKey":       "old-key",
 		"parakeetapikey":       "new-key",
+		"TranscriptionBackend": "parakeet",
+		"transcriptionbackend": "openai",
+		"TranscriptionModel":   "whisper-1",
+		"transcriptionmodel":   "large-v3",
 		"DefaultLanguage":      "en",
 		"defaultlanguage":      "de",
 		"MaxRecordingDuration": float64(60),
@@ -27,6 +31,8 @@ func TestMergeConfigurationFromRawPrefersLowercaseParakeetURL(t *testing.T) {
 
 	assert.Equal(t, "http://10.10.2.85:5092", cfg.ParakeetURL)
 	assert.Equal(t, "new-key", cfg.ParakeetAPIKey)
+	assert.Equal(t, "openai", cfg.TranscriptionBackend)
+	assert.Equal(t, "large-v3", cfg.TranscriptionModel)
 	assert.Equal(t, "de", cfg.DefaultLanguage)
 	assert.Equal(t, int64(120), cfg.MaxRecordingDuration)
 }

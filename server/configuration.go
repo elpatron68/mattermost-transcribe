@@ -9,11 +9,54 @@ import (
 	"github.com/pkg/errors"
 )
 
+const (
+	transcriptionBackendParakeet = "parakeet"
+	transcriptionBackendOpenAI   = "openai"
+	defaultParakeetURL           = "http://parakeet:5092"
+	defaultOpenAIURL             = "https://api.openai.com"
+	defaultOpenAIModel           = "whisper-1"
+)
+
 type configuration struct {
+	TranscriptionBackend string
 	ParakeetURL          string
 	ParakeetAPIKey       string
+	TranscriptionModel   string
 	DefaultLanguage      string
 	MaxRecordingDuration int64
+}
+
+func (c *configuration) transcriptionBackend() string {
+	if strings.TrimSpace(c.TranscriptionBackend) == transcriptionBackendOpenAI {
+		return transcriptionBackendOpenAI
+	}
+	return transcriptionBackendParakeet
+}
+
+func (c *configuration) effectiveTranscriptionURL() string {
+	if c.transcriptionBackend() == transcriptionBackendOpenAI {
+		if trimmed := strings.TrimSpace(c.ParakeetURL); trimmed != "" {
+			return trimmed
+		}
+		return defaultOpenAIURL
+	}
+
+	if trimmed := strings.TrimSpace(c.ParakeetURL); trimmed != "" {
+		return trimmed
+	}
+
+	return defaultParakeetURL
+}
+
+func (c *configuration) effectiveTranscriptionModel() string {
+	if c.transcriptionBackend() == transcriptionBackendOpenAI {
+		if trimmed := strings.TrimSpace(c.TranscriptionModel); trimmed != "" {
+			return trimmed
+		}
+		return defaultOpenAIModel
+	}
+
+	return ""
 }
 
 func (c *configuration) Clone() *configuration {
@@ -27,6 +70,7 @@ func (p *Plugin) getConfiguration() *configuration {
 
 	if p.configuration == nil {
 		return &configuration{
+			TranscriptionBackend: transcriptionBackendParakeet,
 			DefaultLanguage:      "de",
 			MaxRecordingDuration: 120,
 		}
@@ -82,10 +126,20 @@ func mergeConfigurationFromRaw(configuration *configuration, raw map[string]any)
 		stringSetting(raw, "ParakeetURL"),
 		configuration.ParakeetURL,
 	)
+	configuration.TranscriptionBackend = firstNonEmpty(
+		stringSetting(raw, "transcriptionbackend"),
+		stringSetting(raw, "TranscriptionBackend"),
+		configuration.TranscriptionBackend,
+	)
 	configuration.ParakeetAPIKey = firstNonEmpty(
 		stringSetting(raw, "parakeetapikey"),
 		stringSetting(raw, "ParakeetAPIKey"),
 		configuration.ParakeetAPIKey,
+	)
+	configuration.TranscriptionModel = firstNonEmpty(
+		stringSetting(raw, "transcriptionmodel"),
+		stringSetting(raw, "TranscriptionModel"),
+		configuration.TranscriptionModel,
 	)
 	configuration.DefaultLanguage = firstNonEmpty(
 		stringSetting(raw, "defaultlanguage"),
@@ -167,8 +221,11 @@ func (p *Plugin) OnConfigurationChange() error {
 	if configuration.MaxRecordingDuration <= 0 {
 		configuration.MaxRecordingDuration = 120
 	}
+	if strings.TrimSpace(configuration.TranscriptionBackend) == "" {
+		configuration.TranscriptionBackend = transcriptionBackendParakeet
+	}
 
-	if err := validateParakeetURL(configuration.ParakeetURL); err != nil {
+	if err := validateParakeetURL(configuration.effectiveTranscriptionURL()); err != nil {
 		return errors.Wrap(err, "invalid ParakeetURL setting")
 	}
 

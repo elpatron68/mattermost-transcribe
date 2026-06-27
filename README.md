@@ -131,12 +131,24 @@ The bundle is about 60–65 MB (all platform binaries). Ensure upload limits all
 
 ## Plugin Configuration
 
+Open **System Console → Plugins → Transcribe**. Choose **Parakeet** (default, self-hosted) or **OpenAI Whisper** (cloud). The form shows only the fields required for the selected backend.
+
 | Setting | Description | Default |
 |---------|-------------|---------|
-| Parakeet Server URL | Base URL of Parakeet | `http://localhost:5092` |
-| Parakeet API Key | Optional bearer token | empty |
-| Default Language | ISO-639-1 code sent to Parakeet | `de` |
+| Transcription Service | Backend: Parakeet or OpenAI Whisper | Parakeet |
+| Parakeet Server URL | Base URL (Parakeet mode only) | `http://parakeet:5092` |
+| API Key | Parakeet optional key, or OpenAI API key | empty |
+| Model | OpenAI model (OpenAI mode only) | `whisper-1` |
+| Default Language | ISO-639-1 code sent to the ASR service | `de` |
 | Max Recording Duration | Max seconds per recording | `120` |
+
+### OpenAI Whisper API
+
+Select **OpenAI Whisper** in the plugin settings. Set your OpenAI API key and keep the default model `whisper-1`. The plugin uses `https://api.openai.com/v1/audio/transcriptions`. **Audio is sent to OpenAI's cloud.**
+
+### Parakeet (recommended)
+
+Select **Parakeet** and set **Server URL** to a host reachable from Mattermost (e.g. `http://parakeet:5092` in Docker Compose). Optional **API Key** must match `PARAKEET_API_KEY` on the Parakeet server.
 
 ## Usage
 
@@ -167,12 +179,12 @@ Plugin settings in System Console:
 ## Architecture
 
 ```
-Browser (MediaRecorder) → Plugin Server → Parakeet /v1/audio/transcriptions
+Browser (MediaRecorder) → Plugin Server → ASR /v1/audio/transcriptions
                                 ↓
                          Review in client → Text post
 ```
 
-Audio is recorded as WebM in the browser. The plugin server forwards it to Parakeet's Whisper-compatible API and returns the transcript. The client does not post until the user confirms.
+Audio is recorded as WebM in the browser. The plugin server forwards it to a Whisper-compatible transcription API (Parakeet by default, or e.g. OpenAI Whisper) and returns the transcript. The client does not post until the user confirms.
 
 ## Build
 
@@ -217,7 +229,7 @@ docker compose up -d
 This starts Mattermost, PostgreSQL, and Parakeet on the same Docker network. See [mattermost-server-dev/README.md](mattermost-server-dev/README.md) for details.
 
 1. Open **http://localhost:8065** and complete the first-run wizard.
-2. In **System Console → Plugins → Transcribe**, set **Parakeet Server URL** to `http://parakeet:5092` and **Parakeet API Key** to match `PARAKEET_API_KEY` in `.env` (default `dev-secret-key`).
+2. In **System Console → Plugins → Transcribe**, choose **Parakeet** (default) and confirm **Server URL** is `http://parakeet:5092`. Set **API Key** to match `PARAKEET_API_KEY` in `.env` (default `dev-secret-key`) if used.
 3. Create a **Personal Access Token** for your admin user (**Profile → Security → Personal Access Tokens**).
 4. From the **repository root**:
 
@@ -254,8 +266,8 @@ security@medisoftware.de — please do not file public issues for security bugs.
 
 - No mobile native app support (browser microphone APIs)
 - No streaming transcription
-- Parakeet must be reachable from the Mattermost server
-- Maximum audio upload to Parakeet is 25 MB
+- ASR backend must be reachable from the Mattermost server (Parakeet recommended; OpenAI Whisper API optional)
+- Maximum audio upload is 25 MB
 - Parakeet processes one job per worker; concurrent users may wait or hit the 60 s plugin timeout (see [Operations notes](#operations-notes-medisoftware-experience))
 - Parakeet may retain high memory after transcriptions; plan restarts or `mem_limit` (see Parakeet setup above)
 

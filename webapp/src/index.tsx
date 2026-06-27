@@ -11,6 +11,8 @@ import manifest from 'manifest';
 import type {PluginRegistry} from 'types/mattermost-webapp';
 
 import {recordTranscription} from 'actions/recording';
+import HiddenPluginSetting from 'components/admin_settings/hidden_plugin_setting';
+import TranscriptionServiceSection from 'components/admin_settings/transcription_service_section';
 import MicrophoneIcon from 'components/icons/microphone';
 import Root from 'components/root';
 import {getTranslationsForLocale} from 'i18n';
@@ -21,6 +23,11 @@ export default class Plugin {
         registry.registerReducer(reducer);
         registry.registerRootComponent(Root);
         registry.registerTranslations(getTranslationsForLocale);
+        registry.registerAdminConsoleCustomSetting('TranscriptionService', TranscriptionServiceSection, {showTitle: true});
+        registry.registerAdminConsoleCustomSetting('TranscriptionBackend', HiddenPluginSetting, {showTitle: false});
+        registry.registerAdminConsoleCustomSetting('ParakeetURL', HiddenPluginSetting, {showTitle: false});
+        registry.registerAdminConsoleCustomSetting('ParakeetAPIKey', HiddenPluginSetting, {showTitle: false});
+        registry.registerAdminConsoleCustomSetting('TranscriptionModel', HiddenPluginSetting, {showTitle: false});
 
         registry.registerFileUploadMethod(
             <MicrophoneIcon/>,

@@ -50,12 +50,12 @@ Plugin uploads and 100 MB file limit are pre-enabled in `docker-compose.yml`.
 
 ### Parakeet
 
-The Transcribe plugin needs a running [Parakeet](https://github.com/achetronic/parakeet) instance.
-See the root [README](../README.md#parakeet-setup) and set **Parakeet Server URL** in  
-**System Console → Plugins → Transcribe**.
+Parakeet starts with this stack (`docker compose up -d`). In **System Console → Plugins → Transcribe** choose **Parakeet** (default) and set:
 
-From the Mattermost container, use a host-reachable URL (e.g. `http://host.docker.internal:5092`
-on Docker Desktop, or your LAN IP).
+- **Server URL:** `http://parakeet:5092`
+- **API Key:** same as `PARAKEET_API_KEY` in `.env` (default `dev-secret-key`), if used
+
+Health check: `curl http://localhost:5092/health`. See the root [README](../README.md#parakeet-setup) for production tuning (`mem_limit`, `cpus`, `-workers`).
 
 ## Configuration
 

@@ -21,29 +21,45 @@
         "bundle_path": "webapp/dist/main.js"
     },
     "settings_schema": {
-        "header": "Configure the external Parakeet ASR server (Whisper-compatible API).",
-        "footer": "Parakeet must be running separately, e.g. via Docker. See the plugin README for setup instructions.",
+        "header": "Configure the speech-to-text backend for voice messages.",
+        "footer": "Parakeet runs separately (e.g. via Docker). OpenAI sends audio to the cloud. See the plugin README for setup instructions.",
         "settings": [
             {
+                "key": "TranscriptionService",
+                "display_name": "Transcription Service",
+                "type": "custom",
+                "help_text": "Choose the backend and connection settings."
+            },
+            {
+                "key": "TranscriptionBackend",
+                "display_name": "Backend",
+                "type": "custom",
+                "default": "parakeet"
+            },
+            {
                 "key": "ParakeetURL",
-                "display_name": "Parakeet Server URL",
-                "type": "text",
-                "help_text": "Base URL of the Parakeet server, e.g. http://parakeet:5092",
-                "placeholder": "http://localhost:5092",
-                "default": "http://localhost:5092"
+                "display_name": "Server URL",
+                "type": "custom",
+                "default": "http://localhost:5092",
+                "placeholder": "http://parakeet:5092"
             },
             {
                 "key": "ParakeetAPIKey",
-                "display_name": "Parakeet API Key",
-                "type": "password",
-                "help_text": "Optional API key matching PARAKEET_API_KEY on the Parakeet server.",
+                "display_name": "API Key",
+                "type": "custom",
+                "default": ""
+            },
+            {
+                "key": "TranscriptionModel",
+                "display_name": "Model",
+                "type": "custom",
                 "default": ""
             },
             {
                 "key": "DefaultLanguage",
                 "display_name": "Default Language",
                 "type": "text",
-                "help_text": "ISO-639-1 language code sent to Parakeet (e.g. de, en).",
+                "help_text": "ISO-639-1 language code sent to the ASR service (e.g. de, en).",
                 "default": "de"
             },
             {
