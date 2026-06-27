@@ -16,8 +16,8 @@ usage() {
 	cat <<'EOF'
 Usage: scripts/release.sh -v <version> [options]
 
-Prepare a release: bump plugin.json, refresh generated manifests, update
-CHANGELOG.md, commit, create tag v<version>, and push to origin.
+Prepare a release: bump plugin.json, update CHANGELOG.md, run make apply
+(for local/CI builds), commit, create tag v<version>, and push to origin.
 
 Options:
   -v, --version <x.y.z>   Release version (required, semver)
@@ -226,9 +226,14 @@ commit_release() {
 		sign_args=(-s)
 	fi
 
-	git add plugin.json CHANGELOG.md server/manifest.go webapp/src/manifest.ts
+	git add plugin.json CHANGELOG.md
 	git commit -m "$message"
-	git tag "${sign_args[@]}" -a "$tag" -m "$message"
+	if [[ "$UNSIGNED_TAG" == true ]]; then
+		git tag -a "$tag" -m "$message"
+	elif ! git tag "${sign_args[@]}" -a "$tag" -m "$message" 2>/dev/null; then
+		log "GPG signing failed; creating unsigned tag $tag (use --unsigned to skip this warning)"
+		git tag -a "$tag" -m "$message"
+	fi
 
 	if [[ "$NO_PUSH" == true ]]; then
 		log "Created commit and tag $tag locally (--no-push)."
@@ -260,7 +265,7 @@ main() {
 		log "[dry-run] would set plugin.json version to $VERSION"
 		log "[dry-run] would move CHANGELOG [Unreleased] entries to [$VERSION]"
 		log "[dry-run] would run: make apply"
-		log "[dry-run] would git add plugin.json CHANGELOG.md server/manifest.go webapp/src/manifest.ts"
+		log "[dry-run] would git add plugin.json CHANGELOG.md"
 		log "[dry-run] would git commit -m \"Release v${VERSION}.\""
 		if [[ "$UNSIGNED_TAG" == true ]]; then
 			log "[dry-run] would git tag -a v${VERSION} -m \"Release v${VERSION}.\""
