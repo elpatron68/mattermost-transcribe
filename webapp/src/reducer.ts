@@ -30,8 +30,8 @@ const recordingModalVisible = (state = false, action: {type: string}) => {
 const recordingDuration = (state = 0, action: {type: string; duration?: number}) => {
     switch (action.type) {
     case START_RECORDING:
-    case STOP_RECORDING:
     case CANCEL_RECORDING:
+    case CLOSE_RECORDING_MODAL:
         return 0;
     case UPDATE_RECORDING:
         return action.duration ?? 0;
