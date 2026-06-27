@@ -7,8 +7,9 @@
 [![Node.js](https://img.shields.io/badge/node-24.x-339933?logo=node.js&logoColor=white)](.nvmrc)
 [![Mattermost](https://img.shields.io/badge/Mattermost-6.2.1%2B-0058CC?logo=mattermost&logoColor=white)](https://mattermost.com)
 [![Parakeet ASR](https://img.shields.io/badge/ASR-Parakeet-0ea5e9)](https://github.com/achetronic/parakeet)
+[![OpenAI Whisper](https://img.shields.io/badge/ASR-OpenAI%20Whisper-412991?logo=openai&logoColor=white)](https://platform.openai.com/docs/guides/speech-to-text)
 
-Record voice in Mattermost, transcribe it with on-premises [Parakeet](https://github.com/achetronic/parakeet) ASR, review the text, and send it as a channel message.
+Record voice in Mattermost, transcribe it with **self-hosted [Parakeet](https://github.com/achetronic/parakeet)** or the **OpenAI Whisper API**, review the text, and send it as a channel message.
 
 **Plugin ID:** `de.medisoftware.mattermost-transcribe`
 
@@ -18,15 +19,47 @@ Record voice in Mattermost, transcribe it with on-premises [Parakeet](https://gi
 - `/transcribe` slash command (web/desktop client)
 - Live microphone level indicator while recording
 - **Review step** — edit the transcript before posting
-- Server-side proxy to Parakeet (API key stays on the server)
+- **Two transcription backends** — [Parakeet](https://github.com/achetronic/parakeet) (self-hosted) or OpenAI Whisper (cloud)
+- Server-side proxy (API keys stay on the Mattermost server)
 - German and English UI strings
 
 ## Requirements
 
-- Mattermost server 6.2.1+
-- Parakeet ASR server (external, e.g. Docker)
-- Web or desktop client (mobile apps are not supported)
-- HTTPS for microphone access in the browser
+| | All setups | Parakeet | OpenAI Whisper |
+|---|------------|----------|----------------|
+| Mattermost | 6.2.1+ | | |
+| Client | Web or desktop (no mobile native apps) | | |
+| Microphone | HTTPS in the browser | | |
+| ASR service | | Parakeet server reachable from Mattermost (e.g. Docker) | Outbound HTTPS from Mattermost to `api.openai.com` |
+| Credentials | | Optional `PARAKEET_API_KEY` on Parakeet | OpenAI API key with access to audio transcriptions |
+
+## Choosing a backend
+
+| | **Parakeet** (default) | **OpenAI Whisper** |
+|---|------------------------|---------------------|
+| Hosting | Self-hosted on your infrastructure | OpenAI cloud |
+| Data residency | Audio stays on-premises | **Audio is sent to OpenAI** — review their [terms](https://openai.com/policies) and your compliance needs |
+| Setup effort | Run and operate a Parakeet container | API key only; no ASR server to deploy |
+| Ongoing cost | Server RAM/CPU (see below) | Per-minute API usage on your OpenAI account |
+| Best for | Production, privacy-sensitive teams, predictable load | Quick start, dev/test, or when you cannot host Parakeet |
+
+Both backends use the same Whisper-compatible `POST /v1/audio/transcriptions` API. The plugin forwards WebM audio from the browser through the Mattermost server.
+
+## OpenAI Whisper Setup
+
+No separate ASR container is required.
+
+1. Create an API key at [platform.openai.com](https://platform.openai.com/api-keys) with permission to call the Audio API.
+2. Install and enable the plugin (see [Installation](#installation)).
+3. Open **System Console → Plugins → Transcribe**, select **OpenAI Whisper**, paste the key, and save.
+4. Leave **Model** at the default `whisper-1` unless you use a different Whisper model on your account.
+5. Set **Default Language** (`de`, `en`, …) to match your users.
+
+The plugin calls `https://api.openai.com/v1/audio/transcriptions`. Requests time out after **60 seconds**; maximum upload size is **25 MB** per recording (same as Parakeet).
+
+**Privacy:** voice recordings leave your network. Use Parakeet if on-premises processing is required.
+
+**Local development:** you can run the Mattermost dev stack without Parakeet and point the plugin at OpenAI instead — only Mattermost (and PostgreSQL) need to be up in `mattermost-server-dev`.
 
 ## Parakeet Setup
 
@@ -122,7 +155,7 @@ Continue to watch RAM over days of regular use; a slow climb would indicate rete
 
 1. Build or download `dist/de.medisoftware.mattermost-transcribe-<version>.tar.gz`.
 2. Upload via **System Console → Plugins → Plugin Management**.
-3. Enable the plugin and configure Parakeet (see below).
+3. Enable the plugin and configure a transcription backend (see [Plugin Configuration](#plugin-configuration)).
 
 The bundle is about 60–65 MB (all platform binaries). Ensure upload limits allow it:
 
@@ -131,24 +164,32 @@ The bundle is about 60–65 MB (all platform binaries). Ensure upload limits all
 
 ## Plugin Configuration
 
-Open **System Console → Plugins → Transcribe**. Choose **Parakeet** (default, self-hosted) or **OpenAI Whisper** (cloud). The form shows only the fields required for the selected backend.
+Open **System Console → Plugins → Transcribe**. The custom **Transcription Service** section lets you pick a backend; only the fields for that backend are shown.
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| Transcription Service | Backend: Parakeet or OpenAI Whisper | Parakeet |
-| Parakeet Server URL | Base URL (Parakeet mode only) | `http://parakeet:5092` |
-| API Key | Parakeet optional key, or OpenAI API key | empty |
-| Model | OpenAI model (OpenAI mode only) | `whisper-1` |
-| Default Language | ISO-639-1 code sent to the ASR service | `de` |
-| Max Recording Duration | Max seconds per recording | `120` |
+| Setting | Parakeet | OpenAI Whisper |
+|---------|----------|----------------|
+| **Backend** | Parakeet (default) | OpenAI Whisper |
+| **Server URL** | Base URL reachable from Mattermost, e.g. `http://parakeet:5092` | *(fixed)* `https://api.openai.com` |
+| **API Key** | Optional; must match `PARAKEET_API_KEY` on Parakeet | Required OpenAI API key |
+| **Model** | — | `whisper-1` (default) |
+| **Default Language** | ISO-639-1 code (`de`, `en`, …) sent to the ASR API | same |
+| **Max Recording Duration** | Max seconds per recording (default `120`) | same |
 
-### OpenAI Whisper API
+### OpenAI Whisper
 
-Select **OpenAI Whisper** in the plugin settings. Set your OpenAI API key and keep the default model `whisper-1`. The plugin uses `https://api.openai.com/v1/audio/transcriptions`. **Audio is sent to OpenAI's cloud.**
+1. Select **OpenAI Whisper**.
+2. Enter your **OpenAI API Key** (stored in Mattermost plugin settings, used only server-side).
+3. Confirm **Model** is `whisper-1` or adjust if your account uses another Whisper model.
+4. Save and test with `/transcribe` in a channel.
 
-### Parakeet (recommended)
+Billing and rate limits follow your OpenAI plan. Failed or missing keys surface as transcription errors in the client.
 
-Select **Parakeet** and set **Server URL** to a host reachable from Mattermost (e.g. `http://parakeet:5092` in Docker Compose). Optional **API Key** must match `PARAKEET_API_KEY` on the Parakeet server.
+### Parakeet
+
+1. Select **Parakeet**.
+2. Set **Parakeet Server URL** to a host reachable from the Mattermost server (e.g. `http://parakeet:5092` on the same Docker network).
+3. If Parakeet runs with `PARAKEET_API_KEY`, enter the same value under **Parakeet API Key**.
+4. Save and verify `curl http://<host>:5092/health` from the Mattermost host or container.
 
 ## Usage
 
@@ -179,12 +220,16 @@ Plugin settings in System Console:
 ## Architecture
 
 ```
-Browser (MediaRecorder) → Plugin Server → ASR /v1/audio/transcriptions
-                                ↓
-                         Review in client → Text post
+Browser (MediaRecorder, WebM)
+        ↓
+Mattermost plugin server  ──→  Parakeet  POST /v1/audio/transcriptions  (self-hosted)
+        │                  or
+        │                  ──→  OpenAI    POST /v1/audio/transcriptions  (cloud)
+        ↓
+Client review dialog → channel message (text)
 ```
 
-Audio is recorded as WebM in the browser. The plugin server forwards it to a Whisper-compatible transcription API (Parakeet by default, or e.g. OpenAI Whisper) and returns the transcript. The client does not post until the user confirms.
+Audio is recorded in the browser. The plugin server proxies it to the configured backend and returns JSON `{ "text": "..." }`. API keys never reach the client. Nothing is posted until the user confirms in the review step.
 
 ## Build
 
@@ -218,7 +263,7 @@ Go is expected at `~/.local/go/bin/go` or on `PATH`. Prefer cloning the repo on 
 
 ### Development
 
-Start a local Mattermost test server with Parakeet (Docker):
+Start a local Mattermost test server (Docker), optionally with Parakeet:
 
 ```bash
 cd mattermost-server-dev
@@ -229,7 +274,9 @@ docker compose up -d
 This starts Mattermost, PostgreSQL, and Parakeet on the same Docker network. See [mattermost-server-dev/README.md](mattermost-server-dev/README.md) for details.
 
 1. Open **http://localhost:8065** and complete the first-run wizard.
-2. In **System Console → Plugins → Transcribe**, choose **Parakeet** (default) and confirm **Server URL** is `http://parakeet:5092`. Set **API Key** to match `PARAKEET_API_KEY` in `.env` (default `dev-secret-key`) if used.
+2. In **System Console → Plugins → Transcribe**, configure a backend:
+   - **Parakeet (default):** confirm **Server URL** is `http://parakeet:5092` and **API Key** matches `PARAKEET_API_KEY` in `.env` (default `dev-secret-key`) if used.
+   - **OpenAI Whisper:** select OpenAI, enter your API key — Parakeet does not need to be running for transcription.
 3. Create a **Personal Access Token** for your admin user (**Profile → Security → Personal Access Tokens**).
 4. From the **repository root**:
 
@@ -262,14 +309,16 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 Report vulnerabilities per [SECURITY.md](SECURITY.md). Use GitHub Security Advisories or
 security@medisoftware.de — please do not file public issues for security bugs.
 
+API keys (Parakeet or OpenAI) are stored in Mattermost plugin settings and used only on the server when proxying transcription requests. With **OpenAI Whisper**, audio leaves your infrastructure — treat this like any other third-party SaaS integration and restrict the plugin settings to Mattermost system admins.
+
 ## Limitations
 
 - No mobile native app support (browser microphone APIs)
-- No streaming transcription
-- ASR backend must be reachable from the Mattermost server (Parakeet recommended; OpenAI Whisper API optional)
-- Maximum audio upload is 25 MB
-- Parakeet processes one job per worker; concurrent users may wait or hit the 60 s plugin timeout (see [Operations notes](#operations-notes-medisoftware-experience))
-- Parakeet may retain high memory after transcriptions; plan restarts or `mem_limit` (see Parakeet setup above)
+- No streaming transcription — full recording is sent after **Stop & Transcribe**
+- Maximum audio upload is **25 MB** per request (both backends)
+- Plugin timeout is **60 seconds** per transcription (both backends)
+- **Parakeet:** ASR server must be reachable from Mattermost; one job per worker — concurrent users may wait (see [Operations notes](#operations-notes-medisoftware-experience)); memory may stay elevated after jobs — plan `mem_limit` or restarts
+- **OpenAI Whisper:** requires outbound HTTPS to OpenAI; audio and metadata are processed under OpenAI's policies; subject to API availability, quotas, and billing
 
 ## License
 
