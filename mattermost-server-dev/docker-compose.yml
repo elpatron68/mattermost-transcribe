@@ -46,6 +46,29 @@ services:
       - mm_client_plugins:/mattermost/client/plugins
       - mm_bleve:/mattermost/bleve-indexes
 
+  parakeet:
+    image: ghcr.io/achetronic/parakeet:${PARAKEET_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "${PARAKEET_PORT:-5092}:5092"
+    environment:
+      PARAKEET_API_KEY: ${PARAKEET_API_KEY:-dev-secret-key}
+    command:
+      - "-models"
+      - "/models"
+      - "-workers"
+      - "1"
+      - "-log-level"
+      - "info"
+    mem_limit: ${PARAKEET_MEM_LIMIT:-8g}
+    cpus: ${PARAKEET_CPUS:-8}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5092/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
 volumes:
   pgdata:
   mm_config:
