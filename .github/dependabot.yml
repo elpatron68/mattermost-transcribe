@@ -16,6 +16,10 @@ updates:
       interval: weekly
     commit-message:
       prefix: deps
+    ignore:
+      # webpack-cli v6+ breaks the current webpack 5 toolchain (see PR #3)
+      - dependency-name: webpack-cli
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
