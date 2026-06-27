@@ -199,7 +199,7 @@ Go is expected at `~/.local/go/bin/go` or on `PATH`. Prefer cloning the repo on 
 
 ### Development
 
-Start a local Mattermost test server (Docker):
+Start a local Mattermost test server with Parakeet (Docker):
 
 ```bash
 cd mattermost-server-dev
@@ -207,16 +207,22 @@ cp .env.example .env
 docker compose up -d
 ```
 
-See [mattermost-server-dev/README.md](mattermost-server-dev/README.md) for details.  
-For Parakeet (required for transcription), see [docs/PARAKEET-QA.md](../docs/PARAKEET-QA.md).
+This starts Mattermost, PostgreSQL, and Parakeet on the same Docker network. See [mattermost-server-dev/README.md](mattermost-server-dev/README.md) for details.
 
-Enable plugin uploads in `config.json`, then:
+1. Open **http://localhost:8065** and complete the first-run wizard.
+2. In **System Console → Plugins → Transcribe**, set **Parakeet Server URL** to `http://parakeet:5092` and **Parakeet API Key** to match `PARAKEET_API_KEY` in `.env` (default `dev-secret-key`).
+3. Create a **Personal Access Token** for your admin user (**Profile → Security → Personal Access Tokens**).
+4. From the **repository root**:
 
 ```bash
 export MM_SERVICESETTINGS_SITEURL=http://localhost:8065
 export MM_ADMIN_TOKEN=your-token
 make watch
 ```
+
+Plugin uploads and the 100 MB file limit are pre-enabled in `docker-compose.yml`.
+
+For a standalone Parakeet stack (e.g. Marketplace QA), see [docs/PARAKEET-QA.md](docs/PARAKEET-QA.md).
 
 ### Versioning
 
