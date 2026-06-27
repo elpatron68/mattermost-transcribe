@@ -34,10 +34,18 @@ export function adminSettingKeyFor(hostSettingId: string | undefined, settingKey
 
 export function stringSetting(settings: PluginSettings, key: string, fallback = ''): string {
     const value = settings[key];
-    if (value === undefined || value === null) {
-        return fallback;
+    if (value !== undefined && value !== null) {
+        return String(value);
     }
-    return String(value);
+
+    const lowerKey = key.toLowerCase();
+    for (const [settingKey, settingValue] of Object.entries(settings)) {
+        if (settingKey.toLowerCase() === lowerKey && settingValue !== undefined && settingValue !== null) {
+            return String(settingValue);
+        }
+    }
+
+    return fallback;
 }
 
 export function backendFromSettings(settings: PluginSettings): string {

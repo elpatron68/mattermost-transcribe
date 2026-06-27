@@ -17,6 +17,7 @@ describe('transcription_service_settings', () => {
 
     it('recognizes OpenAI backend', () => {
         expect(backendFromSettings({TranscriptionBackend: BACKEND_OPENAI})).toBe(BACKEND_OPENAI);
+        expect(backendFromSettings({transcriptionbackend: BACKEND_OPENAI})).toBe(BACKEND_OPENAI);
     });
 
     it('applies OpenAI defaults when switching backend', () => {
