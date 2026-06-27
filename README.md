@@ -283,7 +283,13 @@ For a standalone Parakeet stack (e.g. Marketplace QA), see [docs/PARAKEET-QA.md]
 
 ### Versioning
 
-Set the release version in `plugin.json` (`version` field) before `make dist`. The Makefile also provides `make patch`, `make minor`, and `make major` for signed git tags (`v*`).
+Set the release version in `plugin.json` (`version` field) before `make dist`, or use the release helper:
+
+```bash
+./scripts/release.sh -v 0.2.0
+```
+
+The script updates `plugin.json` and `CHANGELOG.md`, runs `make apply`, commits, tags `v*`, and pushes to `origin` (which triggers the GitHub Actions release). Options: `--dry-run`, `--no-push`, `-y`. The Makefile also provides `make patch`, `make minor`, and `make major` for signed git tags without bumping `plugin.json`.
 
 ### CI
 
