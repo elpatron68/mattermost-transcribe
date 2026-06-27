@@ -86,8 +86,8 @@ In the plugin settings use:
 
 Set **Parakeet Server URL** to:
 
-- Docker Desktop (Mac/Windows): `http://host.docker.internal:5092`
-- Linux: host gateway IP, e.g. `http://172.17.0.1:5092`
+- `http://host.docker.internal:5092` (Docker Desktop and some Linux setups)
+- Host gateway IP on Linux, e.g. `http://172.17.0.1:5092`
 
 ## End-to-end plugin test
 

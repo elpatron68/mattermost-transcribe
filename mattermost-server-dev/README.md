@@ -76,8 +76,7 @@ put a reverse proxy with TLS in front or use the Mattermost desktop app.
 
 ## Data layout
 
-Persistent data uses **Docker named volumes** (not bind mounts under `./volumes/`). This avoids
-PostgreSQL permission errors when the repo lives on `/mnt/c/` in WSL.
+Persistent data uses **Docker named volumes** (not bind mounts under `./volumes/`). This avoids PostgreSQL permission issues with bind-mounted data directories.
 
 | Volume | Content |
 |--------|---------|
@@ -91,9 +90,7 @@ List volumes: `docker volume ls | grep mattermost-server-dev`
 
 ## Troubleshooting
 
-**`db` unhealthy / `could not change permissions`** — caused by bind mounts on Windows drives
-(`/mnt/c/...`). This compose file uses named volumes; run `docker compose down -v` and `docker compose up -d`
-after updating.
+**`db` unhealthy / `could not change permissions`** — this compose file uses named volumes instead of bind mounts. Run `docker compose down -v` and `docker compose up -d` after updating.
 
 **Server not ready** — first start can take 1–2 minutes while the DB is initialised.
 

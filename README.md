@@ -157,7 +157,7 @@ Continue to watch RAM over days of regular use; a slow climb would indicate rete
 2. Upload via **System Console → Plugins → Plugin Management**.
 3. Enable the plugin and configure a transcription backend (see [Plugin Configuration](#plugin-configuration)).
 
-The bundle is about 60–65 MB (all platform binaries). Ensure upload limits allow it:
+The bundle is about 50–60 MB (Linux and macOS server binaries). Ensure upload limits allow it:
 
 - Mattermost `FileSettings.MaxFileSize` (default often 100 MB)
 - Reverse proxy `client_max_body_size` (e.g. nginx) must be **≥ 100M** in every `location` block that handles `/api/v4/plugins`
@@ -233,7 +233,7 @@ Audio is recorded in the browser. The plugin server proxies it to the configured
 
 ## Build
 
-Recommended on Linux or WSL:
+Development is recommended on **Linux**. Install Go, Node.js, npm, make, and python3 (see [Prerequisites](#prerequisites)), then:
 
 ```bash
 make dist
@@ -245,21 +245,10 @@ Output: `dist/de.medisoftware.mattermost-transcribe-<version>.tar.gz` (version f
 
 ### Prerequisites
 
-- Go (see `go.mod`)
-- Node.js (see `.nvmrc`)
-- npm, make, python3
-
-### WSL
-
-Run `make` from a **WSL shell**, not PowerShell or cmd. The Makefile prefers Linux `go`/`npm` over Windows binaries under `/mnt/c/Program Files/...`.
-
-One-time setup:
-
-```bash
-bash scripts/install-wsl-node.sh
-```
-
-Go is expected at `~/.local/go/bin/go` or on `PATH`. Prefer cloning the repo on the Linux filesystem (`~/...`) rather than `/mnt/c/...` for faster builds and fewer line-ending issues.
+- Linux (recommended for building and local development)
+- Go (see `go.mod`) on `PATH`
+- Node.js (see `.nvmrc`) and npm on `PATH`
+- make, python3
 
 ### Development
 

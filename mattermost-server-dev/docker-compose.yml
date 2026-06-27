@@ -8,7 +8,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-mattermost}
       TZ: ${TZ:-UTC}
     volumes:
-      # Named volume: bind mounts on /mnt/c/ (WSL→Windows) break PostgreSQL permissions.
+      # Named volume: avoids PostgreSQL permission issues with bind mounts.
       - pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mmuser} -d ${POSTGRES_DB:-mattermost}"]
